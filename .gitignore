@@ -4,13 +4,13 @@ cmake-build-*/
 out/
 
 # CMake
-CMakeCache. txt
+CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
 Makefile
-*.cmake
-!CMakeLists.txt
-!cmake/CPM.cmake
+*. cmake
+! CMakeLists.txt
+! cmake/CPM.cmake
 install_manifest.txt
 
 # Compiled files
@@ -18,7 +18,7 @@ install_manifest.txt
 *.so
 *.dylib
 *.dll
-*. a
+*.a
 *.lib
 *.exe
 main
@@ -26,10 +26,10 @@ main
 # IDE
 .vscode/
 .idea/
-*.swp
+*. swp
 *.swo
 *~
-. DS_Store
+.DS_Store
 
 # CPM cache
 _deps/

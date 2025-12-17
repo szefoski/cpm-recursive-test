@@ -1,6 +1,4 @@
-# CPM.cmake - CMake Package Manager
-# Download from: https://github.com/cpm-cmake/CPM.cmake/releases/latest/download/CPM.cmake
-
+# CPM. cmake - CMake Package Manager
 set(CPM_DOWNLOAD_VERSION 0.38.7)
 set(CPM_HASH_SUM "83e5eb71b2bbb8b1f2ad38f1950287a057624e385c238f6087f94cdfc44af9c5")
 
@@ -13,9 +11,9 @@ else()
 endif()
 
 if(NOT (EXISTS ${CPM_DOWNLOAD_LOCATION}))
-  message(STATUS "Downloading CPM.cmake to ${CPM_DOWNLOAD_LOCATION}")
+  message(STATUS "Downloading CPM. cmake to ${CPM_DOWNLOAD_LOCATION}")
   file(DOWNLOAD
-       https://github.com/cpm-cmake/CPM.cmake/releases/download/v${CPM_DOWNLOAD_VERSION}/CPM.cmake
+       https://github.com/cpm-cmake/CPM. cmake/releases/download/v${CPM_DOWNLOAD_VERSION}/CPM.cmake
        ${CPM_DOWNLOAD_LOCATION}
        EXPECTED_HASH SHA256=${CPM_HASH_SUM}
   )

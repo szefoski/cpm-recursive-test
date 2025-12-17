@@ -7,8 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Download CPM if not already available
 if(NOT COMMAND CPMAddPackage)
     file(DOWNLOAD
-         https://github.com/cpm-cmake/CPM.cmake/releases/download/v0.38.7/CPM. cmake
-         ${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake
+         https://github.com/cpm-cmake/CPM.cmake/releases/download/v0.38.7/CPM.cmake
+         ${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM. cmake
          EXPECTED_HASH SHA256=83e5eb71b2bbb8b1f2ad38f1950287a057624e385c238f6087f94cdfc44af9c5
     )
     include(${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake)
@@ -33,6 +33,6 @@ target_include_directories(ProjectA
         $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(ProjectA PUBLIC fmt::fmt)
+target_link_libraries(ProjectA PUBLIC fmt:: fmt)
 
 message(STATUS "[ProjectA] Configured with fmt dependency")

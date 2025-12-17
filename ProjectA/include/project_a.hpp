@@ -6,7 +6,7 @@
 namespace project_a {
 
 class ComponentA {
-public: 
+public:
     ComponentA() = default;
     
     [[nodiscard]] std::string get_info() const noexcept;
