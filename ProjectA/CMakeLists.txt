@@ -36,6 +36,6 @@ target_include_directories(
   ProjectA PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                   $<INSTALL_INTERFACE:include>)
 
-target_link_libraries(ProjectA PUBLIC fmt::fmt)
+target_link_libraries(ProjectA PRIVATE fmt::fmt)
 
 message(STATUS "[ProjectA] Configured with fmt dependency")

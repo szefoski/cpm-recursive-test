@@ -18,6 +18,16 @@ if(NOT COMMAND CPMAddPackage)
   include(${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake)
 endif()
 
+cpmaddpackage(
+  NAME
+  fmt
+  GITHUB_REPOSITORY
+  fmtlib/fmt
+  GIT_TAG
+  10.2.1
+  OPTIONS
+  "FMT_INSTALL YES")
+
 # Dependency on ProjectB (which depends on ProjectA - recursive!)
 cpmaddpackage(NAME ProjectB SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../ProjectB)
 
@@ -28,7 +38,7 @@ target_include_directories(
   ProjectC PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                   $<INSTALL_INTERFACE:include>)
 
-target_link_libraries(ProjectC PUBLIC ProjectB)
+target_link_libraries(ProjectC PUBLIC ProjectB fmt::fmt)
 
 message(
   STATUS
