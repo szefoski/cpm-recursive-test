@@ -9,13 +9,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Download CPM if not already available
 if(NOT COMMAND CPMAddPackage)
-  file(
-    DOWNLOAD
-    https://github.com/cpm-cmake/CPM.cmake/releases/download/v0.38.7/CPM.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake
-    EXPECTED_HASH
-      SHA256=83e5eb71b2bbb8b1f2ad38f1950287a057624e385c238f6087f94cdfc44af9c5)
-  include(${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake)
+  if(NOT EXISTS ${CMAKE_SOURCE_DIR}/cmake/get_cpm.cmake)
+    file(
+      DOWNLOAD
+      https://github.com/cpm-cmake/CPM.cmake/releases/download/v0.42.0/get_cpm.cmake
+      ${CMAKE_SOURCE_DIR}/cmake/get_cpm.cmake)
+  endif()
+  include(${CMAKE_SOURCE_DIR}/cmake/get_cpm.cmake)
 endif()
 
 # External dependency (fmt library)
@@ -25,9 +25,22 @@ cpmaddpackage(
   GITHUB_REPOSITORY
   fmtlib/fmt
   GIT_TAG
-  10.2.1
+  12.1.0
   OPTIONS
   "FMT_INSTALL YES")
+
+cpmaddpackage(
+  NAME
+  googletest
+  GITHUB_REPOSITORY
+  google/googletest
+  GIT_TAG
+  v1.17.0
+  VERSION
+  1.17.0
+  OPTIONS
+  "INSTALL_GTEST OFF"
+  "gtest_force_shared_crt")
 
 # ProjectA library
 add_library(ProjectA src/project_a.cpp)
@@ -36,6 +49,7 @@ target_include_directories(
   ProjectA PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                   $<INSTALL_INTERFACE:include>)
 
-target_link_libraries(ProjectA PRIVATE fmt::fmt)
+target_link_libraries(ProjectA PRIVATE fmt::fmt gtest gmock)
 
 message(STATUS "[ProjectA] Configured with fmt dependency")
+message(STATUS "[ProjectA] Called from: ${CMAKE_SOURCE_DIR}")

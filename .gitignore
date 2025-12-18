@@ -36,3 +36,4 @@ _deps/
 
 # Compile commands
 compile_commands.json
+.cpm-cache/

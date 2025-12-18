@@ -9,13 +9,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Download CPM if not already available
 if(NOT COMMAND CPMAddPackage)
-  file(
-    DOWNLOAD
-    https://github.com/cpm-cmake/CPM.cmake/releases/download/v0.38.7/CPM.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake
-    EXPECTED_HASH
-      SHA256=83e5eb71b2bbb8b1f2ad38f1950287a057624e385c238f6087f94cdfc44af9c5)
-  include(${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake)
+  if(NOT EXISTS ${CMAKE_SOURCE_DIR}/cmake/get_cpm.cmake)
+    file(
+      DOWNLOAD
+      https://github.com/cpm-cmake/CPM.cmake/releases/download/v0.42.0/get_cpm.cmake
+      ${CMAKE_SOURCE_DIR}/cmake/get_cpm.cmake)
+  endif()
+  include(${CMAKE_SOURCE_DIR}/cmake/get_cpm.cmake)
 endif()
 
 # Dependency on ProjectA (recursive dependency)
@@ -31,3 +31,4 @@ target_include_directories(
 target_link_libraries(ProjectB PUBLIC ProjectA)
 
 message(STATUS "[ProjectB] Configured with ProjectA dependency")
+message(STATUS "[ProjectB] Called from: ${CMAKE_SOURCE_DIR}")
