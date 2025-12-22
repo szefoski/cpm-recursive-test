@@ -51,9 +51,6 @@ cpmdeclarepackage(
 # Include HAL components (after external dependencies)
 add_subdirectory(hal)
 
-cpmdeclarepackage(ProjectB NAME ProjectB SOURCE_DIR
-                  ${CMAKE_CURRENT_SOURCE_DIR}/ProjectB)
-
 cpmdeclarepackage(ProjectC NAME ProjectC SOURCE_DIR
                   ${CMAKE_CURRENT_SOURCE_DIR}/ProjectC)
 

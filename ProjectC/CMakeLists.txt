@@ -15,10 +15,6 @@ endif()
 cpmaddpackage(NAME fmt)
 cpmaddpackage(NAME nlohmann_json)
 
-# Dependency on ProjectB (which depends on spi - recursive!) Path declared at
-# root level, we just request by NAME
-cpmaddpackage(NAME ProjectB)
-
 # ProjectC library
 add_library(ProjectC src/project_c.cpp)
 
@@ -26,9 +22,8 @@ target_include_directories(
   ProjectC PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                   $<INSTALL_INTERFACE:include>)
 
-target_link_libraries(ProjectC PUBLIC ProjectB fmt::fmt
+target_link_libraries(ProjectC PUBLIC gpio fmt::fmt
                                       nlohmann_json::nlohmann_json)
 
-message(
-  STATUS "[ProjectC] Configured with ProjectB dependency (recursive to spi)")
+message(STATUS "[ProjectC] Configured with gpio dependency (recursive to spi)")
 message(STATUS "[ProjectC] Called from: ${CMAKE_SOURCE_DIR}")
