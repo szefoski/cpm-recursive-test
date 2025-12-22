@@ -10,17 +10,14 @@ set(CMAKE_COLOR_DIAGNOSTICS ON)
 
 set(CPM_USE_NAMED_CACHE_DIRECTORIES ON)
 
-# Set CPM source cache to speed up builds and share dependencies
+# Set CPM source cache to speed up builds and share dependencies Note:
+# SOURCE_CACHE only applies to downloaded packages, not local SOURCE_DIR
+# packages
 set(CPM_SOURCE_CACHE
     "${CMAKE_SOURCE_DIR}/.cpm-cache"
     CACHE PATH "CPM source cache directory")
 
-# Include vendored CPM.cmake (v0.42.0) for reproducibility and offline builds To
-# upgrade: download new CPM.cmake from
-# https://github.com/cpm-cmake/CPM.cmake/releases
-if(NOT COMMAND CPMAddPackage)
-  include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
-endif()
+include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
 
 # Declare all external dependencies upfront for version consistency
 cpmdeclarepackage(
@@ -51,10 +48,8 @@ cpmdeclarepackage(
   CUSTOM_CACHE_KEY
   "3.11.3")
 
-# Declare all local subprojects upfront (directory-structure agnostic)
-# Subprojects can request these by NAME without knowing their location
-cpmdeclarepackage(ProjectA NAME ProjectA SOURCE_DIR
-                  ${CMAKE_CURRENT_SOURCE_DIR}/ProjectA)
+# Include HAL components (after external dependencies)
+add_subdirectory(hal)
 
 cpmdeclarepackage(ProjectB NAME ProjectB SOURCE_DIR
                   ${CMAKE_CURRENT_SOURCE_DIR}/ProjectB)

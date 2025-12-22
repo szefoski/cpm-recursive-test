@@ -15,8 +15,8 @@ endif()
 cpmaddpackage(NAME fmt)
 cpmaddpackage(NAME nlohmann_json)
 
-# Dependency on ProjectB (which depends on ProjectA - recursive!) Path declared
-# at root level, we just request by NAME
+# Dependency on ProjectB (which depends on spi - recursive!) Path declared at
+# root level, we just request by NAME
 cpmaddpackage(NAME ProjectB)
 
 # ProjectC library
@@ -30,6 +30,5 @@ target_link_libraries(ProjectC PUBLIC ProjectB fmt::fmt
                                       nlohmann_json::nlohmann_json)
 
 message(
-  STATUS
-    "[ProjectC] Configured with ProjectB dependency (recursive to ProjectA)")
+  STATUS "[ProjectC] Configured with ProjectB dependency (recursive to spi)")
 message(STATUS "[ProjectC] Called from: ${CMAKE_SOURCE_DIR}")

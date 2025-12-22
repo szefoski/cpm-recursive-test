@@ -24,7 +24,7 @@ std::vector<std::string> ComponentC::get_full_dependency_chain() const {
       fmt::format("      |-> fmt {}.{}.{} (formatting library)", fmt_major,
                   fmt_minor, fmt_patch),
       "      +-> ProjectB (Middleware component)",
-      "           +-> ProjectA (Base component)",
+      "           +-> spi (HAL component)",
       fmt::format("                |-> nlohmann/json {}.{}.{} (JSON library)",
                   NLOHMANN_JSON_VERSION_MAJOR, NLOHMANN_JSON_VERSION_MINOR,
                   NLOHMANN_JSON_VERSION_PATCH)};
