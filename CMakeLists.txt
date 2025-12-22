@@ -15,8 +15,9 @@ set(CPM_SOURCE_CACHE
     "${CMAKE_SOURCE_DIR}/.cpm-cache"
     CACHE PATH "CPM source cache directory")
 
-# Include vendored CPM.cmake (v0.42.0) for reproducibility and offline builds
-# To upgrade: download new CPM.cmake from https://github.com/cpm-cmake/CPM.cmake/releases
+# Include vendored CPM.cmake (v0.42.0) for reproducibility and offline builds To
+# upgrade: download new CPM.cmake from
+# https://github.com/cpm-cmake/CPM.cmake/releases
 if(NOT COMMAND CPMAddPackage)
   include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
 endif()
