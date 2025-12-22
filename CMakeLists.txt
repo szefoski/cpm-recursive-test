@@ -15,15 +15,10 @@ set(CPM_SOURCE_CACHE
     "${CMAKE_SOURCE_DIR}/.cpm-cache"
     CACHE PATH "CPM source cache directory")
 
-# Download CPM if not already available
+# Include vendored CPM.cmake (v0.42.0) for reproducibility and offline builds
+# To upgrade: download new CPM.cmake from https://github.com/cpm-cmake/CPM.cmake/releases
 if(NOT COMMAND CPMAddPackage)
-  if(NOT EXISTS ${CMAKE_SOURCE_DIR}/cmake/get_cpm.cmake)
-    file(
-      DOWNLOAD
-      https://github.com/cpm-cmake/CPM.cmake/releases/download/v0.42.0/get_cpm.cmake
-      ${CMAKE_SOURCE_DIR}/cmake/get_cpm.cmake)
-  endif()
-  include(${CMAKE_SOURCE_DIR}/cmake/get_cpm.cmake)
+  include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
 endif()
 
 # Add ProjectC (which will recursively pull ProjectB and ProjectA)

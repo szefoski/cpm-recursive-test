@@ -1,0 +1,2 @@
+# Mark CPM.cmake as vendored/generated to exclude from language stats
+cmake/CPM.cmake linguist-vendored

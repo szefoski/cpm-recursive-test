@@ -8,8 +8,8 @@ This project showcases how CPM handles complex dependency chains automatically:
 - **Multi-level recursive dependencies** with automatic resolution
 - **Modern CMake** practices with target-based linking
 - **C++23** features and standards
-- **CPM v0.42.0** with `get_cpm.cmake` for improved caching
-- **Offline mode support** for building without internet access
+- **CPM v0.42.0** vendored for reproducibility and offline builds
+- **Full offline support** - no internet required after cloning
 - **Source caching** via `CPM_SOURCE_CACHE`
 
 ## 🔗 Dependency Chain
@@ -45,7 +45,7 @@ cpm-recursive-test/
 ├── CMakeLists.txt           # Root CMake configuration
 ├── main.cpp                 # Entry point
 ├── cmake/
-│   └── get_cpm.cmake       # CPM bootstrap script
+│   └── CPM.cmake           # Vendored CPM v0.42.0 (45K lines)
 ├── ProjectA/                # Base library (depends on fmt + googletest)
 │   ├── CMakeLists.txt
 │   ├── include/
@@ -104,13 +104,11 @@ set(CPM_SOURCE_CACHE "${CMAKE_SOURCE_DIR}/.cpm-cache")
 ```
 Dependencies are cached locally in `.cpm-cache/` for faster subsequent builds.
 
-### 3. Offline Mode Support
+### 3. Vendored CPM for Offline Builds
 ```cmake
-if(NOT EXISTS ${CMAKE_SOURCE_DIR}/cmake/get_cpm.cmake)
-  file(DOWNLOAD ...)
-endif()
+include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
 ```
-The build script checks for existing files before downloading, enabling offline builds.
+CPM.cmake is committed to the repository, ensuring fully reproducible builds without requiring network access. Dependencies are still downloaded on first build, but CPM itself is always available.
 
 ### 4. Dependency Deduplication with Version Conflicts
 When multiple projects request different versions of the same dependency (like fmt), CPM uses a **"first wins"** strategy - the first version added is used, and subsequent requests for different versions generate warnings. In this project:
