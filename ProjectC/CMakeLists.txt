@@ -25,6 +25,8 @@ cpmaddpackage(
   fmtlib/fmt
   GIT_TAG
   10.2.1
+  CUSTOM_CACHE_KEY
+  "10.2.1"
   OPTIONS
   "FMT_INSTALL YES")
 

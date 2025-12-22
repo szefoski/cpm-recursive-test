@@ -26,6 +26,8 @@ cpmaddpackage(
   fmtlib/fmt
   GIT_TAG
   12.1.0
+  CUSTOM_CACHE_KEY
+  "12.1.0"
   OPTIONS
   "FMT_INSTALL YES")
 
@@ -38,6 +40,8 @@ cpmaddpackage(
   v1.17.0
   VERSION
   1.17.0
+  CUSTOM_CACHE_KEY
+  "1.17.0"
   OPTIONS
   "INSTALL_GTEST OFF"
   "gtest_force_shared_crt")

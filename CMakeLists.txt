@@ -6,6 +6,9 @@ project(
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_COLOR_DIAGNOSTICS ON)
+
+set(CPM_USE_NAMED_CACHE_DIRECTORIES ON)
 
 # Set CPM source cache to speed up builds and share dependencies
 set(CPM_SOURCE_CACHE
