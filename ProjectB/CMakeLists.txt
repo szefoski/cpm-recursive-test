@@ -12,7 +12,7 @@ if(NOT COMMAND CPMAddPackage)
 endif()
 
 # Dependency on ProjectA (recursive dependency)
-cpmaddpackage(NAME ProjectA SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../ProjectA)
+cpmaddpackage(NAME ProjectA SOURCE_DIR ${CMAKE_SOURCE_DIR}/ProjectA)
 
 # ProjectB library
 add_library(ProjectB src/project_b.cpp)

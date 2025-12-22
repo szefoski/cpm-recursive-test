@@ -24,7 +24,7 @@ cpmaddpackage(
   "FMT_INSTALL YES")
 
 # Dependency on ProjectB (which depends on ProjectA - recursive!)
-cpmaddpackage(NAME ProjectB SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../ProjectB)
+cpmaddpackage(NAME ProjectB SOURCE_DIR ${CMAKE_SOURCE_DIR}/ProjectB)
 
 # ProjectC library
 add_library(ProjectC src/project_c.cpp)
