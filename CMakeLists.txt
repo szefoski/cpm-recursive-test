@@ -22,6 +22,35 @@ if(NOT COMMAND CPMAddPackage)
   include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
 endif()
 
+# Declare all external dependencies upfront for version consistency
+cpmdeclarepackage(
+  fmt
+  NAME
+  fmt
+  VERSION
+  12.1.0
+  GITHUB_REPOSITORY
+  fmtlib/fmt
+  GIT_TAG
+  12.1.0
+  CUSTOM_CACHE_KEY
+  "12.1.0"
+  OPTIONS
+  "FMT_INSTALL YES")
+
+cpmdeclarepackage(
+  nlohmann_json
+  NAME
+  nlohmann_json
+  VERSION
+  3.11.3
+  GITHUB_REPOSITORY
+  nlohmann/json
+  GIT_TAG
+  v3.11.3
+  CUSTOM_CACHE_KEY
+  "3.11.3")
+
 # Declare all local subprojects upfront (directory-structure agnostic)
 # Subprojects can request these by NAME without knowing their location
 cpmdeclarepackage(ProjectA NAME ProjectA SOURCE_DIR

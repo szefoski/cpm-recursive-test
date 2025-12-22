@@ -11,33 +11,9 @@ if(NOT COMMAND CPMAddPackage)
   include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
 endif()
 
-# External dependency (fmt library)
-cpmaddpackage(
-  NAME
-  fmt
-  GITHUB_REPOSITORY
-  fmtlib/fmt
-  GIT_TAG
-  12.1.0
-  CUSTOM_CACHE_KEY
-  "12.1.0"
-  OPTIONS
-  "FMT_INSTALL YES")
-
-cpmaddpackage(
-  NAME
-  googletest
-  GITHUB_REPOSITORY
-  google/googletest
-  GIT_TAG
-  v1.17.0
-  VERSION
-  1.17.0
-  CUSTOM_CACHE_KEY
-  "1.17.0"
-  OPTIONS
-  "INSTALL_GTEST OFF"
-  "gtest_force_shared_crt")
+# External dependencies - versions declared at root level
+cpmaddpackage(NAME fmt)
+cpmaddpackage(NAME nlohmann_json)
 
 # ProjectA library
 add_library(ProjectA src/project_a.cpp)
@@ -46,7 +22,7 @@ target_include_directories(
   ProjectA PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                   $<INSTALL_INTERFACE:include>)
 
-target_link_libraries(ProjectA PRIVATE fmt::fmt gtest gmock)
+target_link_libraries(ProjectA PRIVATE fmt::fmt nlohmann_json::nlohmann_json)
 
-message(STATUS "[ProjectA] Configured with fmt dependency")
+message(STATUS "[ProjectA] Configured with fmt and nlohmann/json dependencies")
 message(STATUS "[ProjectA] Called from: ${CMAKE_SOURCE_DIR}")

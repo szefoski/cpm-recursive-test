@@ -11,17 +11,9 @@ if(NOT COMMAND CPMAddPackage)
   include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
 endif()
 
-cpmaddpackage(
-  NAME
-  fmt
-  GITHUB_REPOSITORY
-  fmtlib/fmt
-  GIT_TAG
-  10.2.1
-  CUSTOM_CACHE_KEY
-  "10.2.1"
-  OPTIONS
-  "FMT_INSTALL YES")
+# External dependencies - versions declared at root level
+cpmaddpackage(NAME fmt)
+cpmaddpackage(NAME nlohmann_json)
 
 # Dependency on ProjectB (which depends on ProjectA - recursive!) Path declared
 # at root level, we just request by NAME
@@ -34,7 +26,8 @@ target_include_directories(
   ProjectC PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                   $<INSTALL_INTERFACE:include>)
 
-target_link_libraries(ProjectC PUBLIC ProjectB fmt::fmt)
+target_link_libraries(ProjectC PUBLIC ProjectB fmt::fmt
+                                      nlohmann_json::nlohmann_json)
 
 message(
   STATUS
