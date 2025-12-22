@@ -121,6 +121,33 @@ This demonstrates CPM's version conflict detection. To avoid conflicts, declare 
 - **External**: fmt and GoogleTest from GitHub
 - **Local**: ProjectA, ProjectB, ProjectC from local directories
 
+### 6. Directory-Structure Agnostic Package Declarations
+```cmake
+# Root CMakeLists.txt declares all local subprojects upfront
+CPMDeclarePackage(ProjectA
+  NAME ProjectA
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ProjectA
+)
+```
+
+This approach makes the project **bulletproof** against folder structure changes:
+- **Centralized path declarations** - all paths defined once at root level
+- **Name-based requests** - subprojects request dependencies by NAME only
+- **Zero path knowledge** - subprojects don't need to know where dependencies live
+- **Easy refactoring** - move folders anywhere, just update root declarations
+
+Example in subproject:
+```cmake
+# ProjectB/CMakeLists.txt - no path needed!
+cpmaddpackage(NAME ProjectA)
+```
+
+Benefits:
+- Relocate subprojects without breaking builds
+- Subprojects remain independent and portable
+- Single source of truth for all dependency locations
+- Cleaner, more maintainable CMake configuration
+
 ## 📊 Expected Output
 
 ```

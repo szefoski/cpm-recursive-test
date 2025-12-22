@@ -11,8 +11,9 @@ if(NOT COMMAND CPMAddPackage)
   include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
 endif()
 
-# Dependency on ProjectA (recursive dependency)
-cpmaddpackage(NAME ProjectA SOURCE_DIR ${CMAKE_SOURCE_DIR}/ProjectA)
+# Dependency on ProjectA (recursive dependency) Path declared at root level, we
+# just request by NAME
+cpmaddpackage(NAME ProjectA)
 
 # ProjectB library
 add_library(ProjectB src/project_b.cpp)
