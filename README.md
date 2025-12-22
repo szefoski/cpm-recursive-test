@@ -112,8 +112,12 @@ endif()
 ```
 The build script checks for existing files before downloading, enabling offline builds.
 
-### 4. Automatic Deduplication
-When multiple projects request different versions of the same dependency (like fmt), CPM handles version resolution automatically.
+### 4. Dependency Deduplication with Version Conflicts
+When multiple projects request different versions of the same dependency (like fmt), CPM uses a **"first wins"** strategy - the first version added is used, and subsequent requests for different versions generate warnings. In this project:
+- ProjectC adds fmt 10.2.1 first
+- ProjectA requests fmt 12.1.0 but gets 10.2.1 with a warning
+
+This demonstrates CPM's version conflict detection. To avoid conflicts, declare dependencies at the root level or use `CPMDeclarePackage()` for consistent versions across all subprojects.
 
 ### 5. Mixed Dependency Sources
 - **External**: fmt and GoogleTest from GitHub
