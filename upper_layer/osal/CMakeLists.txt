@@ -22,7 +22,7 @@ target_include_directories(
   osal PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
               $<INSTALL_INTERFACE:include>)
 
-target_link_libraries(osal PUBLIC gpio fmt::fmt nlohmann_json::nlohmann_json)
+target_link_libraries(osal PUBLIC crypto fmt::fmt nlohmann_json::nlohmann_json)
 
-message(STATUS "[osal] Configured with gpio dependency (recursive to spi)")
+message(STATUS "[osal] Configured with crypto dependency (recursive to spi)")
 message(STATUS "[osal] Called from: ${CMAKE_SOURCE_DIR}")

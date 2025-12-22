@@ -22,7 +22,7 @@ std::vector<std::string> ComponentC::get_full_dependency_chain() const {
       " +-> osal (OS Abstraction Layer)",
       fmt::format("      |-> fmt {}.{}.{} (formatting library)", fmt_major,
                   fmt_minor, fmt_patch),
-      "      +-> gpio (HAL component)",
+      "      +-> crypto (HAL component)",
       "           +-> spi (HAL component)",
       fmt::format("                |-> nlohmann/json {}.{}.{} (JSON library)",
                   NLOHMANN_JSON_VERSION_MAJOR, NLOHMANN_JSON_VERSION_MINOR,
