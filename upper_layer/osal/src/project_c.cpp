@@ -8,8 +8,7 @@ ComponentC::ComponentC()
     : component_b_(std::make_unique<project_b::ComponentB>()) {}
 
 std::string ComponentC::get_info() const noexcept {
-  return "ProjectC - Top-level Component (uses " + component_b_->get_info() +
-         ")";
+  return "osal - OS Abstraction Layer (uses " + component_b_->get_info() + ")";
 }
 
 std::vector<std::string> ComponentC::get_full_dependency_chain() const {
@@ -20,7 +19,7 @@ std::vector<std::string> ComponentC::get_full_dependency_chain() const {
 
   return {
       "Main Application",
-      " +-> ProjectC (Top-level component)",
+      " +-> osal (OS Abstraction Layer)",
       fmt::format("      |-> fmt {}.{}.{} (formatting library)", fmt_major,
                   fmt_minor, fmt_patch),
       "      +-> gpio (HAL component)",
@@ -32,7 +31,7 @@ std::vector<std::string> ComponentC::get_full_dependency_chain() const {
 
 std::string ComponentC::execute(std::string_view command) const {
   auto processed = component_b_->process_with_a(command);
-  return "[ProjectC] Final result: " + processed;
+  return "[osal] Final result: " + processed;
 }
 
 } // namespace project_c
