@@ -20,12 +20,12 @@ std::vector<std::string> ComponentC::get_full_dependency_chain() const {
 
   return {
       "Main Application",
-      " └─► ProjectC (Top-level component)",
-      fmt::format("      ├─► fmt {}.{}.{} (formatting library)", fmt_major,
+      " +-> ProjectC (Top-level component)",
+      fmt::format("      |-> fmt {}.{}.{} (formatting library)", fmt_major,
                   fmt_minor, fmt_patch),
-      "      └─► ProjectB (Middleware component)",
-      "           └─► ProjectA (Base component)",
-      fmt::format("                ├─► nlohmann/json {}.{}.{} (JSON library)",
+      "      +-> ProjectB (Middleware component)",
+      "           +-> ProjectA (Base component)",
+      fmt::format("                |-> nlohmann/json {}.{}.{} (JSON library)",
                   NLOHMANN_JSON_VERSION_MAJOR, NLOHMANN_JSON_VERSION_MINOR,
                   NLOHMANN_JSON_VERSION_PATCH)};
 }
