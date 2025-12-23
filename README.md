@@ -39,6 +39,7 @@ Main Application
 - **CPM.cmake v0.42.0** - External dependency management
 - **fmt 12.1.0** - Fast formatting library
 - **nlohmann/json 3.11.3** - JSON library
+- **Google Test 1.15.2** - Unit testing framework
 
 ## 📁 Project Structure
 ```
@@ -49,24 +50,26 @@ cpm-recursive-test/
 │   └── cpm_valid_version.cmake # Custom version validation function
 ├── src/
 │   ├── CMakeLists.txt         # Main executable
-│   └── main.cpp               # Entry point
-├── hal/                       # Hardware Abstraction Layer
 ├── hal/                       # Hardware Abstraction Layer
 │   ├── CMakeLists.txt
 │   ├── spi/                   # SPI HAL component
 │   │   ├── CMakeLists.txt
 │   │   ├── include/spi.hpp
-│   │   └── src/spi.cpp
+│   │   ├── src/spi.cpp
+│   │   └── unit_tests/spi_test.cpp
 │   └── crypto/                # Crypto HAL component
 │       ├── CMakeLists.txt
 │       ├── include/crypto.hpp
-│       └── src/crypto.cpp
+│       ├── src/crypto.cpp
+│       └── unit_tests/crypto_test.cpp
 ├── upper_layer/               # Upper Layer
 │   ├── CMakeLists.txt
 │   └── osal/                  # OS Abstraction Layer
 │       ├── CMakeLists.txt
 │       ├── include/osal.hpp
-│       └── src/osal.cpp
+│       ├── src/osal.cpp
+│       └── unit_tests/osal_test.cpp
+└── .cpm-cache/                # Local dependency cache (gitignored)
 └── .cpm-cache/                # Local dependency cache (gitignored)
 ```
 
@@ -100,8 +103,6 @@ cpm-recursive-test/
 
 - CMake 3.23 or higher
 - C++23 compatible compiler (GCC 14+, Clang 17+, MSVC 2022+)
-- Internet connection (first build only)
-
 ### Build Commands
 
 ```bash
@@ -112,6 +113,13 @@ cmake -B build
 cmake --build build
 
 # Run
+./build/src/main
+
+# Run tests
+cmake -B build -DBUILD_TESTING=ON
+cmake --build build
+cd build && ctest --output-on-failure
+```un
 ./build/src/main
 ```
 
@@ -223,6 +231,65 @@ cpm_valid_version(spi fmt "12.1.0" "12.3.0...12.3.6" "!12.3.4")
 - Explicit version exclusions (e.g., blocking buggy releases)
 - Clear, actionable error messages
 - Centralized validation logic for reuse across components
+
+### Why EXCLUDE_FROM_ALL for dependencies?
+**Problem**: Without `EXCLUDE_FROM_ALL`, building your project also builds:
+- The dependency's library (needed ✓)
+- The dependency's tests (not needed ✗)
+- The dependency's examples (not needed ✗)
+- The dependency's benchmarks (not needed ✗)
+
+**How EXCLUDE_FROM_ALL works:**
+```cmake
+cpmdeclarepackage(
+  GTest
+  ...
+  EXCLUDE_FROM_ALL YES  # ← This flag
+)
+```
+
+**Behavior:**
+- **Downloads** the package when `CPMAddPackage()` is called (always happens)
+- **Builds only what you link to**: If you link to `gtest_main`, only `gtest_main` is built
+- **Skips unnecessary targets**: GTest's own tests, samples, and benchmarks are NOT built
+- **Faster builds**: Only compile what you actually use
+- **Less disk space**: Fewer build artifacts
+
+**Without EXCLUDE_FROM_ALL:**
+```bash
+cmake --build build
+# Builds: your code + GTest lib + GTest's 50+ test executables
+```
+
+**With EXCLUDE_FROM_ALL YES:**
+```bash
+cmake --build build
+# Builds: your code + GTest lib (only what you link against)
+```
+
+**Real-world impact:**
+- Small libraries: 10-30% faster builds
+- Large libraries (Boost, Qt): 50-80% faster builds
+- Multiple dependencies: Compounds significantly
+
+**Key insight:** `EXCLUDE_FROM_ALL` is about **build efficiency**, not about whether the package is downloaded or used. The package is always downloaded when `CPMAddPackage()` is called, but only necessary targets are compiled.
+
+**Best practice recommendation:** 
+- ✅ **Always use `EXCLUDE_FROM_ALL YES` for all third-party dependencies**
+- Apply to fmt, nlohmann/json, GTest, and any other external libraries
+- Only exception: When you explicitly want to build the dependency's own tests (very rare)
+- This is a standard optimization that should be applied consistently
+
+### Why custom version validation?
+- Supports exact versions and single ranges: `12.3.0...12.3.6`
+- Does NOT support: OR operators, multiple ranges, or exclusions
+
+**Solution**: `cpm_valid_version()` function provides:
+- Multiple exact versions as whitelist
+- Multiple version ranges
+- Explicit version exclusions (e.g., blocking buggy releases)
+- Clear, actionable error messages
+- Centralized validation logic for reuse across components
   "!12.3.4"          # But exclude 12.3.4 (buggy release)
 )
 ```
@@ -259,7 +326,44 @@ CMake Error at cmake/cpm_valid_version.cmake:68 (message):
 
 ### Implementation Location
 The function is defined in `cmake/cpm_valid_version.cmake` and included in the root `CMakeLists.txt`.
-- **No CPM for local components**: Use standard CMake `add_subdirectory()` for project components
+
+## 🧪 Unit Testing
+
+This project includes comprehensive unit tests for all components using Google Test.
+
+### Test Structure
+Each component has its tests in a `unit_tests/` directory:
+- `hal/spi/unit_tests/spi_test.cpp` - Tests for SPI component
+- `hal/crypto/unit_tests/crypto_test.cpp` - Tests for Crypto component
+- `upper_layer/osal/unit_tests/osal_test.cpp` - Tests for OSAL component
+
+### Running Tests
+```bash
+# Configure with tests enabled
+cmake -B build -DBUILD_TESTING=ON
+
+# Build everything including tests
+cmake --build build
+
+# Run all tests
+cd build && ctest --output-on-failure
+
+# Or run tests individually
+./build/hal/spi/spi_test
+./build/hal/crypto/crypto_test
+./build/upper_layer/osal/osal_test
+```
+
+### Test Output
+```
+Test project /home/danext/devel/cmake1/cpm-recursive-test/build
+    Start  1: SpiTest.GetInfoReturnsCorrectString
+1/10 Test  #1: SpiTest.GetInfoReturnsCorrectString ...   Passed    0.00 sec
+    Start  2: SpiTest.FormatMessageReturnsFormattedString
+2/10 Test  #2: SpiTest.FormatMessageReturnsFormattedString   Passed    0.00 sec
+    ...
+100% tests passed, 0 tests failed out of 10
+```
 
 ## 📊 Expected Output
 

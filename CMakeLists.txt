@@ -15,6 +15,11 @@ set(CPM_SOURCE_CACHE
 include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/cpm_valid_version.cmake)
 
+# Enable testing at root level
+if(BUILD_TESTING)
+  enable_testing()
+endif()
+
 # Declare all external dependencies upfront for version consistency
 cpmdeclarepackage(
   fmt
@@ -33,6 +38,8 @@ cpmdeclarepackage(
   SYSTEM
   YES
   GIT_SHALLOW
+  YES
+  EXCLUDE_FROM_ALL
   YES)
 
 cpmdeclarepackage(
@@ -50,7 +57,30 @@ cpmdeclarepackage(
   SYSTEM
   YES
   GIT_SHALLOW
+  YES
+  EXCLUDE_FROM_ALL
   YES)
+
+cpmdeclarepackage(
+  GTest
+  NAME
+  GTest
+  VERSION
+  1.15.2
+  GITHUB_REPOSITORY
+  google/googletest
+  GIT_TAG
+  v1.15.2
+  CUSTOM_CACHE_KEY
+  "1.15.2"
+  SYSTEM
+  YES
+  GIT_SHALLOW
+  YES
+  EXCLUDE_FROM_ALL
+  YES
+  OPTIONS
+  "INSTALL_GTEST OFF")
 
 add_subdirectory(hal)
 add_subdirectory(upper_layer)

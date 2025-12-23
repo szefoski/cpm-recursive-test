@@ -18,3 +18,8 @@ target_link_libraries(crypto PUBLIC spi)
 
 message(STATUS "[crypto] Configured with spi dependency")
 message(STATUS "[crypto] Called from: ${CMAKE_SOURCE_DIR}")
+
+# Unit tests
+if(BUILD_TESTING)
+  add_subdirectory(unit_tests)
+endif()

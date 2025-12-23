@@ -26,3 +26,8 @@ target_link_libraries(spi PRIVATE fmt::fmt nlohmann_json::nlohmann_json)
 
 message(STATUS "[spi] Configured with fmt and nlohmann/json dependencies")
 message(STATUS "[spi] Called from: ${CMAKE_SOURCE_DIR}")
+
+# Unit tests
+if(BUILD_TESTING)
+  add_subdirectory(unit_tests)
+endif()
