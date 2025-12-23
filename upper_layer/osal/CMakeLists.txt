@@ -1,9 +1,3 @@
-cmake_minimum_required(VERSION 3.23)
-project(
-  osal
-  VERSION 1.0.0
-  LANGUAGES CXX)
-
 cpmaddpackage(NAME fmt)
 
 # osal library
