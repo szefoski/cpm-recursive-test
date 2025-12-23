@@ -11,7 +11,9 @@ set(CPM_SOURCE_CACHE
     CACHE PATH "CPM source cache directory")
 
 include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
-include(${CMAKE_SOURCE_DIR}/cmake/cpm_valid_version.cmake)
+
+# Enable CPM lock file for reproducible builds
+cpmusepackagelock(package-lock.cmake)
 
 # Enable testing at root level
 if(BUILD_TESTING)
