@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # crypto library
-add_library(crypto src/project_b.cpp)
+add_library(crypto src/crypto.cpp)
 
 target_include_directories(
   crypto PUBLIC $<BUILD_INTERFACE: ${CMAKE_CURRENT_SOURCE_DIR}/include>

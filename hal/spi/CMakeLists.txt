@@ -12,7 +12,7 @@ cpmaddpackage(NAME fmt)
 cpmaddpackage(NAME nlohmann_json)
 
 # spi library
-add_library(spi src/project_a.cpp)
+add_library(spi src/spi.cpp)
 
 target_include_directories(
   spi PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

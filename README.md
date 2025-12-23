@@ -1,181 +1,219 @@
 # CPM Recursive Dependencies Test Framework
 
-A modern C++23 framework demonstrating CPM (CMake Package Manager) recursive dependency management capabilities.
+A modern C++23 framework demonstrating CPM (CMake Package Manager) recursive dependency management with layered architecture.
 
 ## 📋 Overview
 
-This project showcases how CPM handles complex dependency chains automatically: 
-- **Multi-level recursive dependencies** with automatic resolution
+This project showcases how to organize a C++23 project with:
+- **Layered architecture**: HAL → Upper Layer
+- **Local component management** using `add_subdirectory()` for project components
+- **CPM for external dependencies** (fmt, nlohmann/json)
 - **Modern CMake** practices with target-based linking
-- **C++23** features and standards
-- **CPM v0.42.0** vendored for reproducibility and offline builds
-- **Full offline support** - no internet required after cloning
-- **Source caching** via `CPM_SOURCE_CACHE`
+- **C++23** features including `std::println`
+- **CPM v0.42.0** vendored for reproducibility
+- **Proper namespacing** and naming conventions
 
 ## 🔗 Dependency Chain
 
 ```
 Main Application
- └─► ProjectC (Top-level component)
-      ├─► fmt 10.2.1 (formatting library)
-      └─► ProjectB (Middleware component)
-           └─► ProjectA (Base component)
-                ├─► fmt 12.1.0 (upgraded version)
-                └─► GoogleTest 1.17.0 (testing framework)
+ +-> osal (OS Abstraction Layer)
+      |-- fmt 12.1.0
+      +-- crypto (HAL component)
+           +-- spi (HAL component)
+                |-- fmt 12.1.0
+                +-- nlohmann/json 3.11.3
 ```
 
-**Key Features Demonstrated:**
-- Multiple projects requesting different versions of the same dependency (fmt)
-- CPM's automatic deduplication of dependencies
-- Transitive dependency resolution
-- External (GitHub) and local (SOURCE_DIR) dependencies mixed
+**Key Architecture Features:**
+- **HAL Layer**: Hardware abstraction components (spi, crypto)
+- **Upper Layer**: OS abstraction layer (osal)
+- **External Dependencies**: Managed centrally via CPM
+- **Local Components**: Organized by layer with add_subdirectory()
 
 ## 🛠️ Technologies
 
-- **C++23** - Latest C++ standard with `std::print`
+- **C++23** - Latest C++ standard with `std::println`
 - **CMake 3.23+** - Modern build system
-- **CPM.cmake v0.42.0** - Dependency management
-- **fmt** - Fast formatting library (versions 10.2.1 & 12.1.0)
-- **GoogleTest** - Unit testing framework
+- **CPM.cmake v0.42.0** - External dependency management
+- **fmt 12.1.0** - Fast formatting library
+- **nlohmann/json 3.11.3** - JSON library
 
 ## 📁 Project Structure
 
 ```
 cpm-recursive-test/
-├── CMakeLists.txt           # Root CMake configuration
-├── main.cpp                 # Entry point
+├── CMakeLists.txt              # Root configuration
 ├── cmake/
-│   └── CPM.cmake           # Vendored CPM v0.42.0 (45K lines)
-├── ProjectA/                # Base library (depends on fmt + googletest)
+│   └── CPM.cmake              # Vendored CPM v0.42.0
+├── src/
+│   ├── CMakeLists.txt         # Main executable
+│   └── main.cpp               # Entry point
+├── hal/                       # Hardware Abstraction Layer
 │   ├── CMakeLists.txt
-│   ├── include/
-│   └── src/
-├── ProjectB/                # Middleware library (depends on ProjectA)
+│   ├── spi/                   # SPI HAL component
+│   │   ├── CMakeLists.txt
+│   │   ├── include/spi.hpp
+│   │   └── src/spi.cpp
+│   └── crypto/                # Crypto HAL component
+│       ├── CMakeLists.txt
+│       ├── include/crypto.hpp
+│       └── src/crypto.cpp
+├── upper_layer/               # Upper Layer
 │   ├── CMakeLists.txt
-│   ├── include/
-│   └── src/
-├── ProjectC/                # Top-level library (depends on ProjectB + fmt)
-│   ├── CMakeLists.txt
-│   ├── include/
-│   └── src/
-└── .cpm-cache/             # Local dependency cache (gitignored)
+│   └── osal/                  # OS Abstraction Layer
+│       ├── CMakeLists.txt
+│       ├── include/osal.hpp
+│       └── src/osal.cpp
+└── .cpm-cache/                # Local dependency cache (gitignored)
 ```
+
+## 🏗️ Architecture Principles
+
+### Layered Organization
+- **hal/**: Hardware abstraction components
+  - `spi`: SPI interface (depends on fmt, nlohmann/json)
+  - `crypto`: Cryptography (depends on spi)
+- **upper_layer/**: High-level abstractions
+  - `osal`: OS abstraction layer (depends on crypto, fmt)
+
+### Naming Conventions
+- **Namespaces**: Match directory structure (`hal::spi`, `hal::crypto`, `upper_layer::osal`)
+- **Classes**: PascalCase matching component name (`Spi`, `Crypto`, `Osal`)
+- **Files**: Lowercase matching component name (`spi.hpp`, `crypto.cpp`, `osal.cpp`)
+- **Member variables**: Descriptive with trailing underscore (`spi_`, `crypto_`)
+
+### Dependency Management Strategy
+- **External dependencies** (fmt, nlohmann/json): Managed via CPM
+  - Declared centrally in root CMakeLists.txt
+  - Cached in `.cpm-cache/` directory
+- **Local components**: Organized with `add_subdirectory()`
+  - HAL components in `hal/`
+  - Upper layer components in `upper_layer/`
+  - Source directory in `src/`
 
 ## 🚀 Building
 
 ### Prerequisites
 
 - CMake 3.23 or higher
-- C++23 compatible compiler (GCC 13+, Clang 16+, MSVC 2022+)
+- C++23 compatible compiler (GCC 14+, Clang 17+, MSVC 2022+)
 - Internet connection (first build only)
 
 ### Build Commands
 
 ```bash
 # Configure
-cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake -B build
 
 # Build
 cmake --build build
 
 # Run
-./build/main
+./build/src/main
 ```
 
 ### Offline Build
 
-After the first successful build, you can build offline:
+After the first successful build, `.cpm-cache/` contains all external dependencies for offline builds.
 
-```bash
-# The .cpm-cache/ directory contains all dependencies
-# Simply reconfigure and build as usual
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build
-```
+## 🎯 CMake Organization
 
-## 🎯 CPM Features Demonstrated
-
-### 1. Recursive Dependencies
-Each subproject independently declares its dependencies using CPM, and the build system automatically resolves the entire dependency tree.
-
-### 2. Source Caching
+### Root CMakeLists.txt
 ```cmake
-set(CPM_SOURCE_CACHE "${CMAKE_SOURCE_DIR}/.cpm-cache")
-```
-Dependencies are cached locally in `.cpm-cache/` for faster subsequent builds.
+# Declare external dependencies centrally
+cpmdeclarepackage(fmt
+  NAME fmt
+  VERSION 12.1.0
+  GITHUB_REPOSITORY fmtlib/fmt
+  GIT_TAG 12.1.0
+  CUSTOM_CACHE_KEY "12.1.0"
+  OPTIONS "FMT_INSTALL YES")
 
-### 3. Vendored CPM for Offline Builds
+# Add component layers
+add_subdirectory(hal)
+add_subdirectory(upper_layer)
+add_subdirectory(src)
+```
+
+### Layer CMakeLists.txt
 ```cmake
-include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
+# hal/CMakeLists.txt
+add_subdirectory(spi)
+add_subdirectory(crypto)
 ```
-CPM.cmake is committed to the repository, ensuring fully reproducible builds without requiring network access. Dependencies are still downloaded on first build, but CPM itself is always available.
 
-### 4. Dependency Deduplication with Version Conflicts
-When multiple projects request different versions of the same dependency (like fmt), CPM uses a **"first wins"** strategy - the first version added is used, and subsequent requests for different versions generate warnings. In this project:
-- ProjectC adds fmt 10.2.1 first
-- ProjectA requests fmt 12.1.0 but gets 10.2.1 with a warning
-
-This demonstrates CPM's version conflict detection. To avoid conflicts, declare dependencies at the root level or use `CPMDeclarePackage()` for consistent versions across all subprojects.
-
-### 5. Mixed Dependency Sources
-- **External**: fmt and GoogleTest from GitHub
-- **Local**: ProjectA, ProjectB, ProjectC from local directories
-
-### 6. Directory-Structure Agnostic Package Declarations
+### Component CMakeLists.txt Pattern
 ```cmake
-# Root CMakeLists.txt declares all local subprojects upfront
-CPMDeclarePackage(ProjectA
-  NAME ProjectA
-  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ProjectA
-)
+# hal/spi/CMakeLists.txt
+cmake_minimum_required(VERSION 3.23)
+project(spi VERSION 1.0.0 LANGUAGES CXX)
+
+# Request external dependencies by name
+cpmaddpackage(NAME fmt)
+cpmaddpackage(NAME nlohmann_json)
+
+add_library(spi src/spi.cpp)
+target_include_directories(spi PUBLIC ...)
+target_link_libraries(spi PRIVATE fmt::fmt nlohmann_json::nlohmann_json)
 ```
 
-This approach makes the project **bulletproof** against folder structure changes:
-- **Centralized path declarations** - all paths defined once at root level
-- **Name-based requests** - subprojects request dependencies by NAME only
-- **Zero path knowledge** - subprojects don't need to know where dependencies live
-- **Easy refactoring** - move folders anywhere, just update root declarations
-
-Example in subproject:
-```cmake
-# ProjectB/CMakeLists.txt - no path needed!
-cpmaddpackage(NAME ProjectA)
-```
-
-Benefits:
-- Relocate subprojects without breaking builds
-- Subprojects remain independent and portable
-- Single source of truth for all dependency locations
-- Cleaner, more maintainable CMake configuration
+### Key Patterns
+- **CPMDeclarePackage** at root: Declare external dependencies once with full parameters
+- **CPMAddPackage** in components: Request declared dependencies by NAME only
+- **add_subdirectory**: Include local component layers and subdirectories
+- **No CPM for local components**: Use standard CMake `add_subdirectory()` for project components
 
 ## 📊 Expected Output
 
 ```
 === CPM Recursive Dependencies Test ===
 
-Component Info:
-ProjectC - Top-level Component (uses ProjectB - Middleware Component (uses ProjectA - Base Component))
+Osal Info:
+osal - OS Abstraction Layer
+  |-- fmt 12.1.0
+  +-- crypto - Cryptography HAL Component
+    +-- spi - SPI HAL Component
+      |-- fmt 12.1.0
+      +-- nlohmann/json 3.11.3
 
-Full Dependency Chain:
-Main Application
- └─► ProjectC (Top-level component)
-      ├─► fmt 10.2.1 (formatting library)
-      └─► ProjectB (Middleware component)
-           └─► ProjectA (Base component)
-                ├─► fmt 12.1.0 (upgraded version)
-                └─► GoogleTest 1.17.0 (testing framework)
 
 Executing command through dependency chain:
-[ProjectC] Final result: [ProjectB] Processed: [ProjectA] Hello from C++23!
+[osal] Final result: [crypto] Processed: [spi] Hello from C++23!
 
-✓ All recursive dependencies working correctly!
+[OK] All recursive dependencies working correctly!
 ```
+
+## 💡 Design Decisions
+
+### Why add_subdirectory() for local components?
+**Lesson learned**: We initially tried using CPM with `SOURCE_DIR` for local components, but discovered issues:
+- CPM's `SOURCE_CACHE` + `SOURCE_DIR` combination causes caching problems
+- When CPMDeclarePackage is called from add_subdirectory context, SOURCE_DIR gets lost
+- Local components are not "dependencies" - they're part of your source tree
+
+**Solution**: Use standard CMake `add_subdirectory()` for local components:
+- Simpler and more reliable
+- No caching complications
+- Standard CMake practice
+- CPM is designed for external dependencies, not local project structure
+
+### Why CPM for external dependencies?
+- Automatic downloading and version management
+- Source caching for faster rebuilds  
+- Centralized version declarations with CPMDeclarePackage
+- Works offline after first build
+
+### Why layered directory structure?
+- Clear separation of concerns (HAL vs upper layer)
+- Easy to navigate and understand
+- Scalable for adding more components
+- Matches common embedded/systems architecture patterns
+- Each layer has its own CMakeLists.txt for organization
 
 ## 🔧 Configuration Options
 
 ### CPM Source Cache
-Control where dependencies are cached:
-
 ```bash
 # Local cache (default)
 cmake -B build -DCPM_SOURCE_CACHE="${PWD}/.cpm-cache"
@@ -183,28 +221,30 @@ cmake -B build -DCPM_SOURCE_CACHE="${PWD}/.cpm-cache"
 # Global cache
 cmake -B build -DCPM_SOURCE_CACHE="$HOME/.cache/CPM"
 
-# Disable cache
+# Disable cache (always download fresh)
 cmake -B build -DCPM_SOURCE_CACHE=""
 ```
 
 ### Build Options
-
 ```bash
 # Debug build
 cmake -B build -DCMAKE_BUILD_TYPE=Debug
 
+# Release build
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+
 # Verbose output
 cmake -B build -DCMAKE_VERBOSE_MAKEFILE=ON
 
-# Use specific compiler
-cmake -B build -DCMAKE_CXX_COMPILER=g++-13
+# Colored diagnostics
+cmake -B build -DCMAKE_COLOR_DIAGNOSTICS=ON
 ```
 
 ## 📚 Learn More
 
 - [CPM.cmake Documentation](https://github.com/cpm-cmake/CPM.cmake)
 - [fmt Library](https://github.com/fmtlib/fmt)
-- [GoogleTest](https://github.com/google/googletest)
+- [nlohmann/json](https://github.com/nlohmann/json)
 - [Modern CMake](https://cliutils.gitlab.io/modern-cmake/)
 
 ## 📝 License
@@ -213,4 +253,4 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ## 🤝 Contributing
 
-This is a demonstration project. Feel free to use it as a template for your own CPM-based projects!
+This is a demonstration project showing modern C++23 project organization with layered architecture and CMake best practices. Feel free to use it as a template!

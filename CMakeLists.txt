@@ -8,11 +8,6 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_COLOR_DIAGNOSTICS ON)
 
-# set(CPM_USE_NAMED_CACHE_DIRECTORIES ON)
-
-# Set CPM source cache to speed up builds and share dependencies Note:
-# SOURCE_CACHE only applies to downloaded packages, not local SOURCE_DIR
-# packages
 set(CPM_SOURCE_CACHE
     "${CMAKE_SOURCE_DIR}/.cpm-cache"
     CACHE PATH "CPM source cache directory")
@@ -48,15 +43,9 @@ cpmdeclarepackage(
   CUSTOM_CACHE_KEY
   "3.11.3")
 
-# Include HAL components (after external dependencies)
 add_subdirectory(hal)
-
-# Include upper layer components
 add_subdirectory(upper_layer)
-
-# Main executable
-add_executable(main main.cpp)
-target_link_libraries(main PRIVATE osal)
+add_subdirectory(src)
 
 message(STATUS "=== CPM Recursive Dependency Test ===")
 message(
