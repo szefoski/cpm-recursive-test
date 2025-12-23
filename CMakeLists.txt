@@ -37,6 +37,8 @@ cpmdeclarepackage(
   YES
   GIT_SHALLOW
   YES
+  GIT_PROGRESS
+  YES
   EXCLUDE_FROM_ALL
   YES)
 
@@ -56,6 +58,8 @@ cpmdeclarepackage(
   YES
   GIT_SHALLOW
   YES
+  GIT_PROGRESS
+  YES
   EXCLUDE_FROM_ALL
   YES)
 
@@ -74,6 +78,8 @@ cpmdeclarepackage(
   SYSTEM
   YES
   GIT_SHALLOW
+  YES
+  GIT_PROGRESS
   YES
   EXCLUDE_FROM_ALL
   YES
