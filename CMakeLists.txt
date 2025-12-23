@@ -28,7 +28,11 @@ cpmdeclarepackage(
   CUSTOM_CACHE_KEY
   "12.1.0"
   OPTIONS
-  "FMT_INSTALL YES")
+  "FMT_INSTALL YES"
+  SYSTEM
+  YES
+  GIT_SHALLOW
+  YES)
 
 cpmdeclarepackage(
   nlohmann_json
@@ -41,7 +45,11 @@ cpmdeclarepackage(
   GIT_TAG
   v3.11.3
   CUSTOM_CACHE_KEY
-  "3.11.3")
+  "3.11.3"
+  SYSTEM
+  YES
+  GIT_SHALLOW
+  YES)
 
 add_subdirectory(hal)
 add_subdirectory(upper_layer)
