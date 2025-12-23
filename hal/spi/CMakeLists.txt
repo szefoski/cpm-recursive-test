@@ -9,6 +9,9 @@ cpm_valid_version(spi nlohmann_json "3.11.3")
 # spi library
 add_library(spi src/spi.cpp)
 
+target_compile_features(spi PUBLIC cxx_std_23)
+set_target_properties(spi PROPERTIES CXX_EXTENSIONS OFF)
+
 target_include_directories(
   spi PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
              $<INSTALL_INTERFACE:include>)

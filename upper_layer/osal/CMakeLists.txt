@@ -3,6 +3,9 @@ cpmaddpackage(NAME fmt)
 # osal library
 add_library(osal src/osal.cpp)
 
+target_compile_features(osal PUBLIC cxx_std_23)
+set_target_properties(osal PROPERTIES CXX_EXTENSIONS OFF)
+
 target_include_directories(
   osal PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
               $<INSTALL_INTERFACE:include>)
