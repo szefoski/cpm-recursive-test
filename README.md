@@ -11,6 +11,7 @@ This project showcases how to organize a C++23 project with:
 - **Modern CMake** practices with target-based linking
 - **C++23** features including `std::println`
 - **CPM v0.42.0** vendored for reproducibility
+- **Custom version validation** with `cpm_valid_version()` function
 - **Proper namespacing** and naming conventions
 
 ## 🔗 Dependency Chain
@@ -40,15 +41,16 @@ Main Application
 - **nlohmann/json 3.11.3** - JSON library
 
 ## 📁 Project Structure
-
 ```
 cpm-recursive-test/
 ├── CMakeLists.txt              # Root configuration
 ├── cmake/
-│   └── CPM.cmake              # Vendored CPM v0.42.0
+│   ├── CPM.cmake              # Vendored CPM v0.42.0
+│   └── cpm_valid_version.cmake # Custom version validation function
 ├── src/
 │   ├── CMakeLists.txt         # Main executable
 │   └── main.cpp               # Entry point
+├── hal/                       # Hardware Abstraction Layer
 ├── hal/                       # Hardware Abstraction Layer
 │   ├── CMakeLists.txt
 │   ├── spi/                   # SPI HAL component
@@ -142,7 +144,6 @@ add_subdirectory(src)
 add_subdirectory(spi)
 add_subdirectory(crypto)
 ```
-
 ### Component CMakeLists.txt Pattern
 ```cmake
 # hal/spi/CMakeLists.txt
@@ -153,6 +154,10 @@ project(spi VERSION 1.0.0 LANGUAGES CXX)
 cpmaddpackage(NAME fmt)
 cpmaddpackage(NAME nlohmann_json)
 
+# Validate dependency versions with advanced rules
+cpm_valid_version(spi fmt "12.1.0" "12.2.1" "12.3.0...12.3.6" "!12.3.4")
+cpm_valid_version(spi nlohmann_json "3.11.3")
+
 add_library(spi src/spi.cpp)
 target_include_directories(spi PUBLIC ...)
 target_link_libraries(spi PRIVATE fmt::fmt nlohmann_json::nlohmann_json)
@@ -161,7 +166,99 @@ target_link_libraries(spi PRIVATE fmt::fmt nlohmann_json::nlohmann_json)
 ### Key Patterns
 - **CPMDeclarePackage** at root: Declare external dependencies once with full parameters
 - **CPMAddPackage** in components: Request declared dependencies by NAME only
+- **cpm_valid_version**: Custom validation function for version constraints
 - **add_subdirectory**: Include local component layers and subdirectories
+- **No CPM for local components**: Use standard CMake `add_subdirectory()` for project components
+
+## 🔐 Version Validation with cpm_valid_version()
+
+The `cpm_valid_version()` function provides advanced version constraint validation beyond CPM's native capabilities.
+
+### Function Signature
+```cmake
+cpm_valid_version(COMPONENT_NAME PACKAGE_NAME <version_rules>...)
+```
+
+### Supported Version Rules
+
+#### Exact Versions
+```cmake
+cpm_valid_version(spi fmt "12.1.0" "12.2.1")
+# Accepts: 12.1.0 or 12.2.1
+# Rejects: anything else
+```
+
+#### Version Ranges (Inclusive)
+```cmake
+cpm_valid_version(spi fmt "12.3.0...12.3.6")
+# Accepts: 12.3.0, 12.3.1, 12.3.2, 12.3.3, 12.3.4, 12.3.5, 12.3.6
+# Rejects: 12.2.9, 12.3.7, 13.0.0
+```
+
+#### Exclusions (Must combine with other rules)
+```cmake
+cpm_valid_version(spi fmt "12.1.0" "12.3.0...12.3.6" "!12.3.4")
+# Accepts: 12.1.0, 12.3.0-12.3.3, 12.3.5-12.3.6
+# Rejects: 12.3.4 (explicitly excluded), any other version
+```
+
+#### Combined Rules Example
+```cmake
+# Accept specific versions, a range, but exclude buggy versions
+### Why layered directory structure?
+- Clear separation of concerns (HAL vs upper layer)
+- Easy to navigate and understand
+- Scalable for adding more components
+- Matches common embedded/systems architecture patterns
+- Each layer has its own CMakeLists.txt for organization
+
+### Why custom version validation?
+**Problem**: CPM's native `VERSION` parameter has limitations:
+- Supports exact versions and single ranges: `12.3.0...12.3.6`
+- Does NOT support: OR operators, multiple ranges, or exclusions
+
+**Solution**: `cpm_valid_version()` function provides:
+- Multiple exact versions as whitelist
+- Multiple version ranges
+- Explicit version exclusions (e.g., blocking buggy releases)
+- Clear, actionable error messages
+- Centralized validation logic for reuse across components
+  "!12.3.4"          # But exclude 12.3.4 (buggy release)
+)
+```
+
+### Why Use cpm_valid_version()?
+
+**CPM Limitations:**
+- CPM's native `VERSION` parameter supports exact versions and ranges (e.g., `12.3.0...12.3.6`)
+- CPM does NOT support: OR operators, multiple ranges, or exclusions
+- Example: Cannot do `"12.1.0 OR 12.2.0 OR 12.3.0...12.3.6"` natively
+
+**cpm_valid_version() Solution:**
+- ✅ Multiple exact versions: `"12.1.0" "12.2.1" "12.3.0"`
+- ✅ Multiple ranges: `"12.0.0...12.0.5" "12.1.0...12.1.3"`
+- ✅ Version exclusions: `"!12.3.4"` to block specific buggy versions
+- ✅ Combined rules: Mix exact versions, ranges, and exclusions
+- ✅ Clear error messages showing allowed versions vs actual version
+
+### Error Messages
+
+**When validation fails:**
+```
+CMake Error at cmake/cpm_valid_version.cmake:78 (message):
+  [spi] Requires fmt matching version rules: 12.1.0, 12.2.1, 12.3.0...12.3.6, !12.3.4
+    But got version: 11.0.0
+```
+
+**When exclusion triggers:**
+```
+CMake Error at cmake/cpm_valid_version.cmake:68 (message):
+  [spi] fmt version 12.3.4 is explicitly excluded
+    Version rules: 12.1.0, 12.2.1, 12.3.0...12.3.6, !12.3.4
+```
+
+### Implementation Location
+The function is defined in `cmake/cpm_valid_version.cmake` and included in the root `CMakeLists.txt`.
 - **No CPM for local components**: Use standard CMake `add_subdirectory()` for project components
 
 ## 📊 Expected Output
