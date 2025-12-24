@@ -133,6 +133,54 @@ cmake --build build
 
 ---
 
+## ⚡ Quick Build (This Project)
+
+This project includes **CMake presets** for easy building:
+
+```bash
+# Clone the repository
+git clone https://github.com/szefoski/cpm-recursive-test.git
+cd cpm-recursive-test
+
+# Build release version (without tests)
+cmake --preset release
+cmake --build --preset release
+./build-release/src/main
+
+# Build with tests
+cmake --preset release-with-tests
+cmake --build --preset release-with-tests
+
+# Run tests
+ctest --preset release-with-tests
+# Or enter build directory and run ctest
+cd build-release && ctest
+# Or with verbose output on failure
+cd build-release && ctest --output-on-failure
+
+# Debug builds
+cmake --preset debug              # Without tests
+cmake --preset debug-with-tests   # With tests
+```
+
+**Available presets:**
+- `release` - Release build without tests
+- `release-with-tests` - Release build with unit tests
+- `debug` - Debug build without tests
+- `debug-with-tests` - Debug build with unit tests
+
+All presets automatically:
+- Use Ninja generator for fast builds
+- Generate `compile_commands.json` for IDE integration
+- Configure CPM source cache for offline builds
+
+**Update CPM lock file:**
+```bash
+cmake --build --preset update-lock-file
+```
+
+---
+
 ## 🛠️ Project Overview
 
 This repository demonstrates CPM usage through a real-world C++23 example:
