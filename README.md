@@ -2,6 +2,34 @@
 
 A modern C++23 framework demonstrating CPM (CMake Package Manager) recursive dependency management with layered architecture.
 
+## 📑 Table of Contents
+
+- [📋 Overview](#-overview)
+- [🔗 Dependency Chain](#-dependency-chain)
+- [🛠️ Technologies](#️-technologies)
+- [📁 Project Structure](#-project-structure)
+- [🏗️ Architecture Principles](#️-architecture-principles)
+- [🔒 Package Lock Mechanism](#-package-lock-mechanism)
+  - [Philosophy: Libraries vs Applications](#philosophy-libraries-vs-applications)
+  - [Comparison to Cargo (Rust)](#comparison-to-cargo-rust)
+  - [How It Works](#how-it-works)
+  - [Updating Dependencies](#updating-dependencies)
+  - [Best Practices](#best-practices)
+  - [Benefits](#benefits)
+- [🚀 Building](#-building)
+  - [Prerequisites](#prerequisites)
+  - [Build Commands](#build-commands)
+  - [First-Time Setup](#first-time-setup)
+  - [Offline Build](#offline-build)
+- [🎯 CMake Organization](#-cmake-organization)
+- [💡 Design Decisions](#-design-decisions)
+- [🧪 Unit Testing](#-unit-testing)
+- [📊 Expected Output](#-expected-output)
+- [🔧 Configuration Options](#-configuration-options)
+- [📚 Learn More](#-learn-more)
+- [📝 License](#-license)
+- [🤝 Contributing](#-contributing)
+
 ## 📋 Overview
 
 This project showcases how to organize a C++23 project with:
@@ -11,7 +39,7 @@ This project showcases how to organize a C++23 project with:
 - **Modern CMake** practices with target-based linking
 - **C++23** features including `std::println`
 - **CPM v0.42.0** vendored for reproducibility
-- **Custom version validation** with `cpm_valid_version()` function
+- **Package lock file** for reproducible builds (following Cargo/npm best practices)
 - **Proper namespacing** and naming conventions
 
 ## 🔗 Dependency Chain
@@ -29,7 +57,7 @@ Main Application
 **Key Architecture Features:**
 - **HAL Layer**: Hardware abstraction components (spi, crypto)
 - **Upper Layer**: OS abstraction layer (osal)
-- **External Dependencies**: Managed centrally via CPM
+- **External Dependencies**: Managed via CPM with lock file at application level
 - **Local Components**: Organized by layer with add_subdirectory()
 
 ## 🛠️ Technologies
@@ -44,14 +72,15 @@ Main Application
 ## 📁 Project Structure
 ```
 cpm-recursive-test/
-├── CMakeLists.txt              # Root configuration
+├── CMakeLists.txt              # Root configuration with package lock
+├── package-lock.cmake          # Locked dependency versions (auto-generated)
 ├── cmake/
-│   ├── CPM.cmake              # Vendored CPM v0.42.0
-│   └── cpm_valid_version.cmake # Custom version validation function
+│   └── CPM.cmake              # Vendored CPM v0.42.0
 ├── src/
 │   ├── CMakeLists.txt         # Main executable
-├── hal/                       # Hardware Abstraction Layer
-│   ├── CMakeLists.txt
+│   └── main.cpp
+├── hal/                       # Hardware Abstraction Layer (reusable library)
+│   ├── CMakeLists.txt         # Declares requirements (no lock file)
 │   ├── spi/                   # SPI HAL component
 │   │   ├── CMakeLists.txt
 │   │   ├── include/spi.hpp
@@ -62,14 +91,13 @@ cpm-recursive-test/
 │       ├── include/crypto.hpp
 │       ├── src/crypto.cpp
 │       └── unit_tests/crypto_test.cpp
-├── upper_layer/               # Upper Layer
-│   ├── CMakeLists.txt
+├── upper_layer/               # Upper Layer (reusable library)
+│   ├── CMakeLists.txt         # Declares requirements (no lock file)
 │   └── osal/                  # OS Abstraction Layer
 │       ├── CMakeLists.txt
 │       ├── include/osal.hpp
 │       ├── src/osal.cpp
 │       └── unit_tests/osal_test.cpp
-└── .cpm-cache/                # Local dependency cache (gitignored)
 └── .cpm-cache/                # Local dependency cache (gitignored)
 ```
 
@@ -90,12 +118,120 @@ cpm-recursive-test/
 
 ### Dependency Management Strategy
 - **External dependencies** (fmt, nlohmann/json): Managed via CPM
-  - Declared centrally in root CMakeLists.txt
+  - Libraries (`hal/`, `upper_layer/`) declare version requirements
+  - Application (root) locks specific versions via `package-lock.cmake`
   - Cached in `.cpm-cache/` directory
 - **Local components**: Organized with `add_subdirectory()`
   - HAL components in `hal/`
   - Upper layer components in `upper_layer/`
   - Source directory in `src/`
+## 🔒 Package Lock Mechanism
+
+This project uses CPM's package lock file mechanism, following **Cargo (Rust) best practices**:
+
+### Philosophy: Libraries vs Applications
+
+**Libraries** (`hal/`, `upper_layer/`):
+- ✅ Declare version **requirements** with `CPMDeclarePackage()`
+- ❌ **NO** lock files
+- Why: Allow consumers flexibility in dependency resolution
+
+**Application** (root):
+- ✅ Single `package-lock.cmake` locks all transitive dependencies
+- ✅ Ensures **reproducible builds** across teams and CI/CD
+- Why: Exact versions guarantee consistent behavior
+
+### Comparison to Cargo (Rust)
+
+| Feature | Cargo | CPM (This Project) |
+|---------|-------|-------------------|
+| Library dependencies | `Cargo.toml` with version requirements | `CPMDeclarePackage()` in library CMakeLists.txt |
+| Lock files in libraries | ❌ Not committed (`.gitignore`) | ❌ Not created |
+| Application lock file | ✅ `Cargo.lock` committed | ✅ `package-lock.cmake` committed |
+| Lock file generation | Automatic on `cargo build` | `cmake --build build --target cpm-update-package-lock` |
+| Update dependencies | `cargo update` | Delete lock + regenerate |
+
+### How It Works
+
+**1. Libraries declare requirements:**
+```cmake
+# hal/CMakeLists.txt
+include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
+
+CPMDeclarePackage(fmt
+  NAME fmt
+  VERSION 12.1.0  # Requirement, not locked version
+  GITHUB_REPOSITORY fmtlib/fmt
+  GIT_TAG 12.1.0
+  ...
+)
+```
+
+**2. Application loads lock file:**
+```cmake
+# CMakeLists.txt (root)
+include(cmake/CPM.cmake)
+CPMUsePackageLock(package-lock.cmake)  # ← Lock file takes priority
+
+add_subdirectory(hal)
+add_subdirectory(upper_layer)
+```
+
+**3. Lock file contains exact versions:**
+```cmake
+# package-lock.cmake (auto-generated)
+CPMDeclarePackage(fmt
+  NAME fmt
+  VERSION 12.1.0
+  GIT_TAG 12.1.0          # ← Exact commit
+  GITHUB_REPOSITORY fmtlib/fmt
+  CUSTOM_CACHE_KEY 12.1.0 # ← Cache isolation
+  ...
+)
+```
+
+### Updating Dependencies
+
+**Method 1: Update library requirements, regenerate lock**
+```bash
+# 1. Edit hal/CMakeLists.txt or upper_layer/CMakeLists.txt
+#    Change VERSION in CPMDeclarePackage()
+
+# 2. Clean and regenerate lock file
+rm package-lock.cmake
+rm -rf .cpm-cache/fmt .cpm-cache/nlohmann_json  # Clear affected packages
+cmake -B build
+cmake --build build --target cpm-update-package-lock
+```
+
+**Method 2: Edit lock file directly** (for quick pins)
+```bash
+# Edit package-lock.cmake directly
+# Change VERSION or GIT_TAG
+
+# Reconfigure
+rm -rf build .cpm-cache/<package>
+cmake -B build
+```
+
+### Best Practices
+
+✅ **DO:**
+- Commit `package-lock.cmake` to version control
+- Regenerate lock file when adding/updating dependencies
+- Use lock file in CI/CD for reproducible builds
+
+❌ **DON'T:**
+- Create lock files in library directories
+- Manually write lock file from scratch (use `cpm-update-package-lock` target)
+- Edit library CMakeLists.txt expecting immediate effect (lock file has priority)
+
+### Benefits
+
+1. **Reproducible Builds**: Everyone gets exact same dependency versions
+2. **Library Flexibility**: Libraries can be consumed by different apps with different resolutions
+3. **Explicit Updates**: Dependency changes are visible in version control
+4. **Industry Standard**: Matches Cargo, npm, poetry, bundler patterns
 
 ## 🚀 Building
 
@@ -103,10 +239,11 @@ cpm-recursive-test/
 
 - CMake 3.23 or higher
 - C++23 compatible compiler (GCC 14+, Clang 17+, MSVC 2022+)
+
 ### Build Commands
 
 ```bash
-# Configure
+# Configure (lock file auto-used if present)
 cmake -B build
 
 # Build
@@ -119,8 +256,22 @@ cmake --build build
 cmake -B build -DBUILD_TESTING=ON
 cmake --build build
 cd build && ctest --output-on-failure
-```un
-./build/src/main
+```
+
+### First-Time Setup
+
+```bash
+# Clean build from scratch
+rm -rf build .cpm-cache package-lock.cmake
+
+# Configure (downloads dependencies)
+cmake -B build -DBUILD_TESTING=ON
+
+# Generate lock file
+cmake --build build --target cpm-update-package-lock
+
+# Build everything
+cmake --build build
 ```
 
 ### Offline Build
@@ -131,14 +282,9 @@ After the first successful build, `.cpm-cache/` contains all external dependenci
 
 ### Root CMakeLists.txt
 ```cmake
-# Declare external dependencies centrally
-cpmdeclarepackage(fmt
-  NAME fmt
-  VERSION 12.1.0
-  GITHUB_REPOSITORY fmtlib/fmt
-  GIT_TAG 12.1.0
-  CUSTOM_CACHE_KEY "12.1.0"
-  OPTIONS "FMT_INSTALL YES")
+# Package lock file - reproducible builds
+include(cmake/CPM.cmake)
+CPMUsePackageLock(package-lock.cmake)
 
 # Add component layers
 add_subdirectory(hal)
@@ -146,9 +292,25 @@ add_subdirectory(upper_layer)
 add_subdirectory(src)
 ```
 
-### Layer CMakeLists.txt
+### Library CMakeLists.txt (hal/, upper_layer/)
 ```cmake
 # hal/CMakeLists.txt
+include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
+
+# Declare dependency requirements (not locked)
+CPMDeclarePackage(fmt
+  NAME fmt
+  VERSION 12.1.0
+  GITHUB_REPOSITORY fmtlib/fmt
+  GIT_TAG 12.1.0
+  CUSTOM_CACHE_KEY "12.1.0"
+  OPTIONS "FMT_INSTALL YES"
+  SYSTEM YES
+  GIT_SHALLOW YES
+  EXCLUDE_FROM_ALL YES
+)
+
+# Add HAL components
 add_subdirectory(spi)
 add_subdirectory(crypto)
 ```
@@ -158,79 +320,37 @@ add_subdirectory(crypto)
 cmake_minimum_required(VERSION 3.23)
 project(spi VERSION 1.0.0 LANGUAGES CXX)
 
-# Request external dependencies by name
-cpmaddpackage(NAME fmt)
-cpmaddpackage(NAME nlohmann_json)
-
-# Validate dependency versions with advanced rules
-cpm_valid_version(spi fmt "12.1.0" "12.2.1" "12.3.0...12.3.6" "!12.3.4")
-cpm_valid_version(spi nlohmann_json "3.11.3")
+# Request external dependencies by name (versions from parent)
+CPMAddPackage(NAME fmt)
+CPMAddPackage(NAME nlohmann_json)
 
 add_library(spi src/spi.cpp)
-target_include_directories(spi PUBLIC ...)
+target_include_directories(spi PUBLIC include)
 target_link_libraries(spi PRIVATE fmt::fmt nlohmann_json::nlohmann_json)
 ```
 
 ### Key Patterns
-- **CPMDeclarePackage** at root: Declare external dependencies once with full parameters
+- **CPMUsePackageLock** at root: Load lock file for reproducible builds
+- **CPMDeclarePackage** in libraries: Declare version requirements
 - **CPMAddPackage** in components: Request declared dependencies by NAME only
-- **cpm_valid_version**: Custom validation function for version constraints
 - **add_subdirectory**: Include local component layers and subdirectories
-- **No CPM for local components**: Use standard CMake `add_subdirectory()` for project components
+- **No lock files in libraries**: Only the final application has a lock file
 
-## 🔐 Version Validation with cpm_valid_version()
+## 💡 Design Decisions
 
-The `cpm_valid_version()` function provides advanced version constraint validation beyond CPM's native capabilities.
+### Why package lock file?
+Following **Cargo (Rust) best practices**:
+- **Reproducible builds**: Everyone gets exact same dependency versions
+- **Library flexibility**: hal/upper_layer can be reused with different version resolutions
+- **Explicit updates**: Dependency changes visible in version control
+- **CI/CD consistency**: Lock file ensures identical builds across environments
 
-### Function Signature
-```cmake
-cpm_valid_version(COMPONENT_NAME PACKAGE_NAME <version_rules>...)
-```
-
-### Supported Version Rules
-
-#### Exact Versions
-```cmake
-cpm_valid_version(spi fmt "12.1.0" "12.2.1")
-# Accepts: 12.1.0 or 12.2.1
-# Rejects: anything else
-```
-
-#### Version Ranges (Inclusive)
-```cmake
-cpm_valid_version(spi fmt "12.3.0...12.3.6")
-# Accepts: 12.3.0, 12.3.1, 12.3.2, 12.3.3, 12.3.4, 12.3.5, 12.3.6
-# Rejects: 12.2.9, 12.3.7, 13.0.0
-```
-
-#### Exclusions (Must combine with other rules)
-```cmake
-cpm_valid_version(spi fmt "12.1.0" "12.3.0...12.3.6" "!12.3.4")
-# Accepts: 12.1.0, 12.3.0-12.3.3, 12.3.5-12.3.6
-# Rejects: 12.3.4 (explicitly excluded), any other version
-```
-
-#### Combined Rules Example
-```cmake
-# Accept specific versions, a range, but exclude buggy versions
 ### Why layered directory structure?
 - Clear separation of concerns (HAL vs upper layer)
 - Easy to navigate and understand
 - Scalable for adding more components
 - Matches common embedded/systems architecture patterns
 - Each layer has its own CMakeLists.txt for organization
-
-### Why custom version validation?
-**Problem**: CPM's native `VERSION` parameter has limitations:
-- Supports exact versions and single ranges: `12.3.0...12.3.6`
-- Does NOT support: OR operators, multiple ranges, or exclusions
-
-**Solution**: `cpm_valid_version()` function provides:
-- Multiple exact versions as whitelist
-- Multiple version ranges
-- Explicit version exclusions (e.g., blocking buggy releases)
-- Clear, actionable error messages
-- Centralized validation logic for reuse across components
 
 ### Why EXCLUDE_FROM_ALL for dependencies?
 **Problem**: Without `EXCLUDE_FROM_ALL`, building your project also builds:
@@ -241,7 +361,7 @@ cpm_valid_version(spi fmt "12.1.0" "12.3.0...12.3.6" "!12.3.4")
 
 **How EXCLUDE_FROM_ALL works:**
 ```cmake
-cpmdeclarepackage(
+CPMDeclarePackage(
   GTest
   ...
   EXCLUDE_FROM_ALL YES  # ← This flag
@@ -280,52 +400,7 @@ cmake --build build
 - Only exception: When you explicitly want to build the dependency's own tests (very rare)
 - This is a standard optimization that should be applied consistently
 
-### Why custom version validation?
-- Supports exact versions and single ranges: `12.3.0...12.3.6`
-- Does NOT support: OR operators, multiple ranges, or exclusions
 
-**Solution**: `cpm_valid_version()` function provides:
-- Multiple exact versions as whitelist
-- Multiple version ranges
-- Explicit version exclusions (e.g., blocking buggy releases)
-- Clear, actionable error messages
-- Centralized validation logic for reuse across components
-  "!12.3.4"          # But exclude 12.3.4 (buggy release)
-)
-```
-
-### Why Use cpm_valid_version()?
-
-**CPM Limitations:**
-- CPM's native `VERSION` parameter supports exact versions and ranges (e.g., `12.3.0...12.3.6`)
-- CPM does NOT support: OR operators, multiple ranges, or exclusions
-- Example: Cannot do `"12.1.0 OR 12.2.0 OR 12.3.0...12.3.6"` natively
-
-**cpm_valid_version() Solution:**
-- ✅ Multiple exact versions: `"12.1.0" "12.2.1" "12.3.0"`
-- ✅ Multiple ranges: `"12.0.0...12.0.5" "12.1.0...12.1.3"`
-- ✅ Version exclusions: `"!12.3.4"` to block specific buggy versions
-- ✅ Combined rules: Mix exact versions, ranges, and exclusions
-- ✅ Clear error messages showing allowed versions vs actual version
-
-### Error Messages
-
-**When validation fails:**
-```
-CMake Error at cmake/cpm_valid_version.cmake:78 (message):
-  [spi] Requires fmt matching version rules: 12.1.0, 12.2.1, 12.3.0...12.3.6, !12.3.4
-    But got version: 11.0.0
-```
-
-**When exclusion triggers:**
-```
-CMake Error at cmake/cpm_valid_version.cmake:68 (message):
-  [spi] fmt version 12.3.4 is explicitly excluded
-    Version rules: 12.1.0, 12.2.1, 12.3.0...12.3.6, !12.3.4
-```
-
-### Implementation Location
-The function is defined in `cmake/cpm_valid_version.cmake` and included in the root `CMakeLists.txt`.
 
 ## 🧪 Unit Testing
 
@@ -385,8 +460,6 @@ Executing command through dependency chain:
 [OK] All recursive dependencies working correctly!
 ```
 
-## 💡 Design Decisions
-
 ### Why add_subdirectory() for local components?
 **Lesson learned**: We initially tried using CPM with `SOURCE_DIR` for local components, but discovered issues:
 - CPM's `SOURCE_CACHE` + `SOURCE_DIR` combination causes caching problems
@@ -401,16 +474,9 @@ Executing command through dependency chain:
 
 ### Why CPM for external dependencies?
 - Automatic downloading and version management
-- Source caching for faster rebuilds  
-- Centralized version declarations with CPMDeclarePackage
+- Source caching for faster rebuilds
+- Declarative dependency management with CPMDeclarePackage
 - Works offline after first build
-
-### Why layered directory structure?
-- Clear separation of concerns (HAL vs upper layer)
-- Easy to navigate and understand
-- Scalable for adding more components
-- Matches common embedded/systems architecture patterns
-- Each layer has its own CMakeLists.txt for organization
 
 ## 🔧 Configuration Options
 
