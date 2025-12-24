@@ -1,0 +1,11 @@
+--- a/README.md
++++ b/README.md
+@@ -25,6 +25,8 @@
+ [![Discord](https://img.shields.io/discord/1003743314341793913)](https://discord.gg/6mrGXKvX7y)
+ 
+ - [Design goals](#design-goals)
++
++> 🔧 **CPM Patch Demo**: This library has been patched to demonstrate CPM's PATCHES feature
+ - [Sponsors](#sponsors)
+ - [Support](#support) ([documentation](https://json.nlohmann.me), [FAQ](https://json.nlohmann.me/home/faq/), [discussions](https://github.com/nlohmann/json/discussions), [API](https://json.nlohmann.me/api/basic_json/), [bug issues](https://github.com/nlohmann/json/issues))
+ - [Examples](#examples)

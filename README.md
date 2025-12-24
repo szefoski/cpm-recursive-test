@@ -28,6 +28,9 @@ A comprehensive guide to using CPM (CMake Package Manager) for C++ projects, dem
   - [Component Level](#component-level)
   - [Key Patterns](#key-patterns)
 - [🔧 Configuration Options](#-configuration-options)
+  - [CPM Source Cache](#cpm-source-cache)
+  - [Build Options](#build-options)
+- [🩹 Patching Dependencies](#-patching-dependencies)
 
 ### Reference Implementation
 - [🏗️ Architecture Principles](#️-architecture-principles)
@@ -143,6 +146,7 @@ This repository demonstrates CPM usage through a real-world C++23 example:
 - ✅ **Package lock files** - Application-level reproducibility (Cargo/npm-style)
 - ✅ **Multi-project dependencies** - Libraries declare requirements independently
 - ✅ **Transitive dependencies** - Automatic resolution through dependency chain
+- ✅ **Dependency patching** - Apply custom fixes with PATCHES parameter
 - ✅ **Source caching** - Offline builds after first download
 - ✅ **CPMDeclarePackage + CPMAddPackage** - Advanced dependency patterns
 - ✅ **EXCLUDE_FROM_ALL** - Build optimization for faster compilation
@@ -752,6 +756,155 @@ Executing command through dependency chain:
 - Source caching for faster rebuilds
 - Declarative dependency management with CPMDeclarePackage
 - Works offline after first build
+
+---
+
+## 🩹 Patching Dependencies
+
+CPM supports applying patches to downloaded dependencies using the `PATCHES` parameter. This is useful for:
+- **Bug fixes** - Apply upstream fixes before they're released
+- **Custom modifications** - Adapt libraries to your specific needs
+- **Compatibility fixes** - Resolve build issues for your platform
+- **Feature backports** - Add features to older versions
+
+### Example: Patching nlohmann/json
+
+This project demonstrates patching with two simple patches to nlohmann/json:
+
+**1. Create patch files:**
+
+`hal/patches/nlohmann_json/01-add-custom-comment.patch`:
+```patch
+--- a/README.md
++++ b/README.md
+@@ -25,6 +25,8 @@
+ [![Discord](https://img.shields.io/discord/1003743314341793913)](https://discord.gg/6mrGXKvX7y)
+ 
+ - [Design goals](#design-goals)
++
++> 🔧 **CPM Patch Demo**: This library has been patched to demonstrate CPM's PATCHES feature
+ - [Sponsors](#sponsors)
+ - [Support](#support)
+```
+
+`hal/patches/nlohmann_json/02-customize-namespace.patch`:
+```patch
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,3 +1,5 @@
++## PATCHED VERSION - CPM Demonstration
++
+ cmake_minimum_required(VERSION 3.1...3.14)
+```
+
+**2. Apply patches in CPMDeclarePackage:**
+
+```cmake
+# hal/CMakeLists.txt
+CPMDeclarePackage(
+  nlohmann_json
+  NAME nlohmann_json
+  VERSION 3.11.3
+  GITHUB_REPOSITORY nlohmann/json
+  GIT_TAG v3.11.3
+  CUSTOM_CACHE_KEY "3.11.3-patched"  # ← Different key for patched version
+  PATCHES
+    "${CMAKE_CURRENT_LIST_DIR}/patches/nlohmann_json/01-add-custom-comment.patch"
+    "${CMAKE_CURRENT_LIST_DIR}/patches/nlohmann_json/02-customize-namespace.patch"
+  SYSTEM YES
+  GIT_SHALLOW YES
+  EXCLUDE_FROM_ALL YES
+)
+```
+
+### How It Works
+
+1. **Download** - CPM clones the repository at specified GIT_TAG
+2. **Apply patches** - Patches are applied using `git apply` or `patch` command
+3. **Build** - The patched source is built as usual
+4. **Cache** - Patched version is cached separately (note the `-patched` suffix in CUSTOM_CACHE_KEY)
+
+### Creating Patches
+
+**From Git diff:**
+```bash
+# Make changes to downloaded dependency
+cd .cpm-cache/nlohmann_json/3.11.3/
+# Edit files...
+git diff > ../../patches/nlohmann_json/my-fix.patch
+```
+
+**Standard patch format:**
+```bash
+diff -u original.cpp modified.cpp > my-fix.patch
+```
+
+### Best Practices
+✅ **DO:**
+- Use CUSTOM_CACHE_KEY with `-patched` suffix to separate patched versions
+- Store patches in project-specific directory (e.g., `hal/patches/<package-name>/`)
+- Name patches descriptively: `01-fix-bug.patch`, `02-add-feature.patch`
+- Name patches descriptively: `01-fix-bug.patch`, `02-add-feature.patch`
+- Document why each patch is needed (comments in CMakeLists.txt)
+- Keep patches minimal and focused
+- Test that patches apply cleanly after dependency updates
+
+❌ **DON'T:**
+- Use patches for major changes (consider forking instead)
+- Forget to regenerate lock file when adding/removing patches (see [Updating Dependencies](#updating-dependencies))
+- Apply patches that break the dependency's API
+
+### Workflow: Adding/Removing Patches
+
+**Important:** When you add or remove patches, you must clear the cached dependency and regenerate the lock file.
+
+**Why?** CPM caches dependencies based on `CUSTOM_CACHE_KEY`. If the cached version already exists, CPM won't re-download and won't apply your new patches.
+
+**Workflow when adding/removing patches:**
+
+```bash
+# 1. Edit your CMakeLists.txt to add/remove PATCHES parameter
+
+# 2. Clear the cached dependency
+rm -rf .cpm-cache/nlohmann_json
+
+# 3. Clear and regenerate lock file
+rm package-lock.cmake
+cmake -B build
+cmake --build build --target cpm-update-package-lock
+
+# 4. Rebuild
+cmake --build build
+```
+
+**See [Updating Dependencies](#updating-dependencies) for detailed lock file update workflow.**
+
+**Note:** If you **don't use** `CUSTOM_CACHE_KEY` at all, CPM automatically generates a unique cache key that includes patches. In that case, changing patches creates a different cache location automatically, and you only need to regenerate the lock file.
+
+### Verification
+
+Check if patches were applied:
+```bash
+# Look for patched content in cached source
+grep "CPM Patch Demo" .cpm-cache/nlohmann_json/3.11.3-patched/README.md
+head -3 .cpm-cache/nlohmann_json/3.11.3-patched/CMakeLists.txt
+```
+
+### When Patches Fail
+
+If configuration fails with patch errors:
+```
+patching file CMakeLists.txt
+Hunk #1 FAILED at 1.
+```
+
+**Solutions:**
+1. Check patch file format (unified diff with correct line numbers)
+2. Verify patch matches the exact GIT_TAG version
+3. Test patch manually: `cd .cpm-cache/<pkg> && patch -p1 < patch-file.patch`
+4. Update patch if dependency version changed
+
+---
 
 ## 🔧 Configuration Options
 

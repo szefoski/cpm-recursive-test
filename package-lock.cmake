@@ -23,7 +23,7 @@ CPMDeclarePackage(nlohmann_json
   SYSTEM YES
   GIT_SHALLOW YES
   EXCLUDE_FROM_ALL YES
-  CUSTOM_CACHE_KEY 3.11.3 GIT_PROGRESS YES
+  CUSTOM_CACHE_KEY 3.11.3-patched PATCHES /home/danext/devel/cmake1/cpm-recursive-test/hal/patches/nlohmann_json/01-add-custom-comment.patch /home/danext/devel/cmake1/cpm-recursive-test/hal/patches/nlohmann_json/02-customize-namespace.patch GIT_PROGRESS YES
 )
 # GTest
 CPMDeclarePackage(GTest

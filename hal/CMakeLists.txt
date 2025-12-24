@@ -47,7 +47,10 @@ cpmdeclarepackage(
   GIT_TAG
   v3.11.3
   CUSTOM_CACHE_KEY
-  "3.11.3"
+  "3.11.3-patched"
+  PATCHES
+  "${CMAKE_CURRENT_LIST_DIR}/patches/nlohmann_json/01-add-custom-comment.patch"
+  "${CMAKE_CURRENT_LIST_DIR}/patches/nlohmann_json/02-customize-namespace.patch"
   SYSTEM
   YES
   GIT_SHALLOW
