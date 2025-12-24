@@ -1,0 +1,95 @@
+h1. CPM.cmake Best Practices Guide
+
+*A comprehensive manual for modern C++ dependency management using CPM.cmake*
+
+h2. Overview
+
+This project demonstrates professional CPM.cmake usage through a working C++23 example with layered architecture. It serves as both *documentation and reference implementation* for teams adopting CPM in production environments.
+
+🔗 *Repository:* [github.com/szefoski/cpm-recursive-test|https://github.com/szefoski/cpm-recursive-test]
+
+----
+
+h2. What You'll Learn
+
+(/) *Package Lock Files* - Cargo/npm-style reproducible builds for C++ projects
+(/) *Multi-Project Architecture* - How libraries and applications manage dependencies differently
+(/) *Dependency Patching* - Apply custom fixes to third-party libraries
+(/) *Build Optimization* - Speed up compilation with {{EXCLUDE_FROM_ALL}} and {{GIT_SHALLOW}}
+(/) *Source Caching* - Enable offline development and faster CI/CD pipelines
+(/) *cmake-format Integration* - Maintain consistent code style across teams
+
+----
+
+h2. Key Features Demonstrated
+
+|| Feature || Description ||
+| *Package Lock Mechanism* | Application-level lock files following Cargo (Rust) best practices |
+| *CPMDeclarePackage Pattern* | Libraries declare requirements, applications lock versions |
+| *Dependency Patching* | Apply custom patches with {{PATCHES}} parameter |
+| *Real-World Architecture* | HAL layer + Upper layer with transitive dependencies |
+| *cmake-format Config* | CPM-aware formatting for maintainable CMake code |
+
+----
+
+h2. Quick Example
+
+{code:cmake}
+# Library: Declare requirements (flexible)
+CPMDeclarePackage(fmt
+  VERSION 12.1.0
+  GITHUB_REPOSITORY fmtlib/fmt
+  GIT_SHALLOW YES
+  EXCLUDE_FROM_ALL YES
+)
+
+# Application: Lock exact versions
+CPMUsePackageLock(package-lock.cmake)
+{code}
+
+----
+
+h2. Technologies
+
+* *C++23* with modern features ({{std::println}})
+* *CMake 3.23+* with CPM.cmake v0.42.0
+* *Dependencies:* fmt, nlohmann/json, Google Test
+* *Real-world patterns:* Layered architecture with HAL and upper layers
+
+----
+
+h2. Why This Matters
+
+(x) *Traditional approach:* Manual dependency installation, version conflicts, "works on my machine"
+(/) *CPM.cmake approach:* Automatic downloads, reproducible builds, consistent across all developers
+
+*Performance gains:*
+* {{GIT_SHALLOW}}: 8-11x faster dependency downloads
+* {{EXCLUDE_FROM_ALL}}: 50-80% faster builds for large libraries
+* Source cache: Offline development after first build
+
+----
+
+h2. Get Started
+
+# *Browse the repository* for complete examples and detailed documentation
+# *Read the README* - Comprehensive guide with real-world examples
+# *Clone and build* - Working C++23 project ready to compile
+# *Adapt to your project* - Use as a template for your team
+
+📖 *Full documentation, examples, and best practices:* [README.md|https://github.com/szefoski/cpm-recursive-test/blob/test-cpm-lock-file/README.md]
+
+----
+
+h2. Target Audience
+
+* C++ developers adopting modern dependency management
+* Teams migrating from Git submodules or manual installations
+* Projects requiring reproducible builds for CI/CD
+* Anyone looking for CMake best practices with CPM
+
+----
+
+{info}
+*Questions?* Check the repository's comprehensive README or open an issue for discussion.
+{info}
