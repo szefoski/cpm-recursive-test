@@ -471,9 +471,6 @@ add_subdirectory(crypto)
 
 ```cmake
 # hal/spi/CMakeLists.txt
-cmake_minimum_required(VERSION 3.23)
-project(spi VERSION 1.0.0 LANGUAGES CXX)
-
 # Request external dependencies by name (versions from parent)
 CPMAddPackage(NAME fmt)
 CPMAddPackage(NAME nlohmann_json)
@@ -844,7 +841,6 @@ diff -u original.cpp modified.cpp > my-fix.patch
 - Use CUSTOM_CACHE_KEY with `-patched` suffix to separate patched versions
 - Store patches in project-specific directory (e.g., `hal/patches/<package-name>/`)
 - Name patches descriptively: `01-fix-bug.patch`, `02-add-feature.patch`
-- Name patches descriptively: `01-fix-bug.patch`, `02-add-feature.patch`
 - Document why each patch is needed (comments in CMakeLists.txt)
 - Keep patches minimal and focused
 - Test that patches apply cleanly after dependency updates
@@ -854,7 +850,7 @@ diff -u original.cpp modified.cpp > my-fix.patch
 - Forget to regenerate lock file when adding/removing patches (see [Updating Dependencies](#updating-dependencies))
 - Apply patches that break the dependency's API
 
-### Workflow: Adding/Removing Patches
+### Workflow: Adding/Removing Patchess
 
 **Important:** When you add or remove patches, you must clear the cached dependency and regenerate the lock file.
 
