@@ -6,7 +6,8 @@ set_target_properties(crypto PROPERTIES CXX_EXTENSIONS OFF)
 
 target_include_directories(
   crypto PUBLIC $<BUILD_INTERFACE: ${CMAKE_CURRENT_SOURCE_DIR}/include>
-                $<INSTALL_INTERFACE:include>)
+                $<INSTALL_INTERFACE:include>
+)
 
 target_link_libraries(crypto PUBLIC spi)
 

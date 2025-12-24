@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.23)
 
 if(NOT TARGET gtest_main)
-  cpmaddpackage(NAME GTest)
+  CPMAddPackage(NAME GTest)
 endif()
 
 if(TARGET gtest_main)
