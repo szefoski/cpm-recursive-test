@@ -1,4 +1,5 @@
 {
+    "$schema": "https://cmake.org/cmake/help/latest/_downloads/3e2d73bff478d88a7de0de736ba5e361/schema.json",
     "version": 10,
     "cmakeMinimumRequired": {
         "major": 4,
@@ -7,14 +8,44 @@
     },
     "configurePresets": [
         {
+            "name": "base",
+            "hidden": true,
+            "description": "Base preset with common settings",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "CMAKE_COLOR_DIAGNOSTICS": "ON"
+            },
+            "environment": {
+                "CPM_SOURCE_CACHE": "${sourceDir}/.cpm-cache"
+            }
+        },
+        {
+            "name": "debug-base",
+            "hidden": true,
+            "inherits": "base",
+            "description": "Base debug configuration",
+            "binaryDir": "${sourceDir}/build-debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "release-base",
+            "hidden": true,
+            "inherits": "base",
+            "description": "Base release configuration",
+            "binaryDir": "${sourceDir}/build-release",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
             "name": "debug",
             "displayName": "Debug",
             "description": "Debug build without tests",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build-debug",
+            "inherits": "debug-base",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
                 "BUILD_TESTING": "OFF"
             }
         },
@@ -22,11 +53,8 @@
             "name": "debug-with-tests",
             "displayName": "Debug With Tests",
             "description": "Debug build with tests enabled",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build-debug",
+            "inherits": "debug-base",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
                 "BUILD_TESTING": "ON"
             }
         },
@@ -34,11 +62,8 @@
             "name": "release",
             "displayName": "Release",
             "description": "Release build without tests",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build-release",
+            "inherits": "release-base",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release",
-                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
                 "BUILD_TESTING": "OFF"
             }
         },
@@ -46,34 +71,41 @@
             "name": "release-with-tests",
             "displayName": "Release With Tests",
             "description": "Release build with tests enabled",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build-release",
+            "inherits": "release-base",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release",
-                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
                 "BUILD_TESTING": "ON"
             }
         }
     ],
     "buildPresets": [
         {
-            "name": "release",
-            "configurePreset": "release"
-        },
-        {
-            "name": "release-with-tests",
-            "configurePreset": "release-with-tests"
-        },
-        {
             "name": "debug",
+            "displayName": "Debug",
+            "description": "Build debug configuration",
             "configurePreset": "debug"
         },
         {
             "name": "debug-with-tests",
+            "displayName": "Debug With Tests",
+            "description": "Build debug with tests",
             "configurePreset": "debug-with-tests"
         },
         {
+            "name": "release",
+            "displayName": "Release",
+            "description": "Build release configuration",
+            "configurePreset": "release"
+        },
+        {
+            "name": "release-with-tests",
+            "displayName": "Release With Tests",
+            "description": "Build release with tests",
+            "configurePreset": "release-with-tests"
+        },
+        {
             "name": "update-lock-file",
+            "displayName": "Update Package Lock File",
+            "description": "Regenerate CPM package lock file",
             "configurePreset": "release",
             "targets": [
                 "cpm-update-package-lock"
@@ -82,18 +114,72 @@
     ],
     "testPresets": [
         {
-            "name": "release-with-tests",
-            "configurePreset": "release-with-tests",
+            "name": "debug-with-tests",
+            "displayName": "Debug Tests",
+            "description": "Run tests in debug mode",
+            "configurePreset": "debug-with-tests",
             "output": {
-                "outputOnFailure": true
+                "outputOnFailure": true,
+                "verbosity": "default"
+            },
+            "execution": {
+                "noTestsAction": "error",
+                "stopOnFailure": false
             }
         },
         {
-            "name": "debug-with-tests",
-            "configurePreset": "debug-with-tests",
+            "name": "release-with-tests",
+            "displayName": "Release Tests",
+            "description": "Run tests in release mode",
+            "configurePreset": "release-with-tests",
             "output": {
-                "outputOnFailure": true
+                "outputOnFailure": true,
+                "verbosity": "default"
+            },
+            "execution": {
+                "noTestsAction": "error",
+                "stopOnFailure": false
             }
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "debug-workflow",
+            "displayName": "Debug Workflow",
+            "description": "Configure, build, and test debug configuration",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "debug-with-tests"
+                },
+                {
+                    "type": "build",
+                    "name": "debug-with-tests"
+                },
+                {
+                    "type": "test",
+                    "name": "debug-with-tests"
+                }
+            ]
+        },
+        {
+            "name": "release-workflow",
+            "displayName": "Release Workflow",
+            "description": "Configure, build, and test release configuration",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "release-with-tests"
+                },
+                {
+                    "type": "build",
+                    "name": "release-with-tests"
+                },
+                {
+                    "type": "test",
+                    "name": "release-with-tests"
+                }
+            ]
         }
     ]
 }

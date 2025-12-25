@@ -137,13 +137,18 @@ cmake --build build
 
 ## ⚡ Quick Build (This Project)
 
-This project includes **CMake presets** for easy building:
+This project includes **CMake presets** (version 10) with modern features for easy building:
 
 ```bash
 # Clone the repository
 git clone https://github.com/szefoski/cpm-recursive-test.git
 cd cpm-recursive-test
 
+# 🚀 RECOMMENDED: Use workflow presets (configure + build + test in one command)
+cmake --workflow --preset debug-workflow      # Full debug workflow
+cmake --workflow --preset release-workflow    # Full release workflow
+
+# Or traditional step-by-step approach:
 # Build release version (without tests)
 cmake --preset release
 cmake --build --preset release
@@ -165,16 +170,28 @@ cmake --preset debug              # Without tests
 cmake --preset debug-with-tests   # With tests
 ```
 
-**Available presets:**
+**Available Configure Presets:**
 - `release` - Release build without tests
 - `release-with-tests` - Release build with unit tests
 - `debug` - Debug build without tests
 - `debug-with-tests` - Debug build with unit tests
 
+**Available Workflow Presets** (CMake 3.25+):
+- `debug-workflow` - Configure → Build → Test (debug mode)
+- `release-workflow` - Configure → Build → Test (release mode)
+
+**Modern Features Used:**
+- ✅ **Preset inheritance** - Reduces duplication with base presets
+- ✅ **Workflow presets** - Single command for full build pipeline
+- ✅ **Environment variables** - CPM cache configured via environment
+- ✅ **Enhanced test output** - Automatic failure details, test verbosity control
+- ✅ **Hidden base presets** - Clean preset organization
+
 All presets automatically:
 - Use Ninja generator for fast builds
 - Generate `compile_commands.json` for IDE integration
 - Configure CPM source cache for offline builds
+- Enable colored diagnostics
 
 **Update CPM lock file:**
 ```bash
