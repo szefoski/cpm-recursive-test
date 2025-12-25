@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 4.2.1)
 project(
   CPMRecursiveTest
   VERSION 1.0.0

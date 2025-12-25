@@ -111,7 +111,7 @@ include(${CMAKE_BINARY_DIR}/cmake/CPM.cmake)
 
 ```cmake
 # CMakeLists.txt
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 4.2.1)
 project(MyProject)
 
 include(cmake/CPM-dz-patched.cmake)
@@ -203,7 +203,7 @@ This repository demonstrates CPM usage through a real-world C++23 example:
 
 **Technologies Used:**
 - **C++23** - Modern C++ with `std::println`
-- **CMake 3.23+** - Build system
+- **CMake 4.2.1+** - Build system
 - **CPM.cmake v0.42.0** - Package manager
 - **fmt 12.1.0** - Formatting library
 - **nlohmann/json 3.11.3** - JSON library
@@ -236,7 +236,7 @@ Main Application
 ## 🛠️ Technologies
 
 - **C++23** - Latest C++ standard with `std::println`
-- **CMake 3.23+** - Modern build system
+- **CMake 4.2.1+** - Modern build system
 - **CPM.cmake v0.42.0** - External dependency management
 - **fmt 12.1.0** - Fast formatting library
 - **nlohmann/json 3.11.3** - JSON library
@@ -411,7 +411,7 @@ cmake -B build
 
 ### Prerequisites
 
-- CMake 3.23 or higher
+- CMake 4.2.1 or higher
 - C++23 compatible compiler (GCC 14+, Clang 17+, MSVC 2022+)
 
 ### Build Commands
@@ -464,7 +464,7 @@ CPM provides flexible patterns for organizing dependencies in multi-project setu
 
 ```cmake
 # CMakeLists.txt (root)
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 4.2.1)
 project(MyApp)
 
 # Package lock file - reproducible builds
@@ -488,7 +488,7 @@ add_subdirectory(src)
 
 ```cmake
 # hal/CMakeLists.txt
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 4.2.1)
 project(hal VERSION 1.0.0)
 
 include(${CMAKE_SOURCE_DIR}/cmake/CPM-dz-patched.cmake)
