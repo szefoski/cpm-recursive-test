@@ -46,8 +46,6 @@ A comprehensive guide to using CPM (CMake Package Manager) for C++ projects, dem
 ### Additional Resources
 - [🛠️ Technologies](#️-technologies)
 - [📚 Learn More](#-learn-more)
-- [📝 License](#-license)
-- [🤝 Contributing](#-contributing)
 
 ---
 
@@ -140,10 +138,6 @@ cmake --build build
 This project includes **CMake presets** (version 10) with modern features for easy building:
 
 ```bash
-# Clone the repository
-git clone https://github.com/szefoski/cpm-recursive-test.git
-cd cpm-recursive-test
-
 # 🚀 RECOMMENDED: Use workflow presets (configure + build + test in one command)
 cmake --workflow --preset debug-workflow      # Full debug workflow
 cmake --workflow --preset release-workflow    # Full release workflow
@@ -1005,11 +999,3 @@ cmake -B build -DCMAKE_COLOR_DIAGNOSTICS=ON
 - [fmt Library](https://github.com/fmtlib/fmt)
 - [nlohmann/json](https://github.com/nlohmann/json)
 - [Modern CMake](https://cliutils.gitlab.io/modern-cmake/)
-
-## 📝 License
-
-MIT License - See [LICENSE](LICENSE) file for details.
-
-## 🤝 Contributing
-
-This is a demonstration project showing modern C++23 project organization with layered architecture and CMake best practices. Feel free to use it as a template!

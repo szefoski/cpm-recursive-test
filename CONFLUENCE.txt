@@ -6,8 +6,6 @@ h2. Overview
 
 This project demonstrates professional CPM.cmake usage through a working C++23 example with layered architecture. It serves as both *documentation and reference implementation* for teams adopting CPM in production environments.
 
-🔗 *Repository:* [github.com/szefoski/cpm-recursive-test|https://github.com/szefoski/cpm-recursive-test]
-
 ----
 
 h2. What You'll Learn
@@ -76,8 +74,6 @@ h2. Get Started
 # *Read the README* - Comprehensive guide with real-world examples
 # *Clone and build* - Working C++23 project ready to compile
 # *Adapt to your project* - Use as a template for your team
-
-📖 *Full documentation, examples, and best practices:* [README.md|https://github.com/szefoski/cpm-recursive-test/blob/test-cpm-lock-file/README.md]
 
 ----
 
