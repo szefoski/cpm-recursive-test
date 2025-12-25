@@ -1,5 +1,5 @@
 # Build directories
-build/
+build*/
 cmake-build-*/
 out/
 
@@ -37,3 +37,4 @@ _deps/
 # Compile commands
 compile_commands.json
 .cpm-cache/
+build-debug/

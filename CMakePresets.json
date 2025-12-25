@@ -1,0 +1,99 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 23,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "debug",
+            "displayName": "Debug",
+            "description": "Debug build without tests",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build-debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "BUILD_TESTING": "OFF"
+            }
+        },
+        {
+            "name": "debug-with-tests",
+            "displayName": "Debug With Tests",
+            "description": "Debug build with tests enabled",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build-debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "BUILD_TESTING": "ON"
+            }
+        },
+        {
+            "name": "release",
+            "displayName": "Release",
+            "description": "Release build without tests",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build-release",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "BUILD_TESTING": "OFF"
+            }
+        },
+        {
+            "name": "release-with-tests",
+            "displayName": "Release With Tests",
+            "description": "Release build with tests enabled",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build-release",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "BUILD_TESTING": "ON"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "release",
+            "configurePreset": "release"
+        },
+        {
+            "name": "release-with-tests",
+            "configurePreset": "release-with-tests"
+        },
+        {
+            "name": "debug",
+            "configurePreset": "debug"
+        },
+        {
+            "name": "debug-with-tests",
+            "configurePreset": "debug-with-tests"
+        },
+        {
+            "name": "update-lock-file",
+            "configurePreset": "release",
+            "targets": [
+                "cpm-update-package-lock"
+            ]
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "release-with-tests",
+            "configurePreset": "release-with-tests",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "debug-with-tests",
+            "configurePreset": "debug-with-tests",
+            "output": {
+                "outputOnFailure": true
+            }
+        }
+    ]
+}

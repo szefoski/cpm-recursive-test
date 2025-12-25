@@ -6,7 +6,7 @@ project(
 )
 
 # CPM setup for HAL project
-include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/CPM-dz-patched.cmake)
 
 # Enable testing for HAL
 if(BUILD_TESTING)
@@ -22,7 +22,7 @@ CPMDeclarePackage(
   GIT_TAG 12.1.0 CUSTOM_CACHE_KEY "12.1.0"
   OPTIONS "FMT_INSTALL YES"
   SYSTEM YES
-  GIT_SHALLOW YES GIT_PROGRESS YES
+  GIT_SHALLOW YES
   EXCLUDE_FROM_ALL YES
 )
 
@@ -35,7 +35,7 @@ CPMDeclarePackage(
   PATCHES "${CMAKE_CURRENT_LIST_DIR}/patches/nlohmann_json/01-add-custom-comment.patch"
           "${CMAKE_CURRENT_LIST_DIR}/patches/nlohmann_json/02-customize-namespace.patch"
   SYSTEM YES
-  GIT_SHALLOW YES GIT_PROGRESS YES
+  GIT_SHALLOW YES
   EXCLUDE_FROM_ALL YES
 )
 
@@ -46,7 +46,7 @@ CPMDeclarePackage(
   GITHUB_REPOSITORY google/googletest
   GIT_TAG v1.15.2 CUSTOM_CACHE_KEY "1.15.2"
   SYSTEM YES
-  GIT_SHALLOW YES GIT_PROGRESS YES
+  GIT_SHALLOW YES
   EXCLUDE_FROM_ALL YES
   OPTIONS "INSTALL_GTEST OFF"
 )

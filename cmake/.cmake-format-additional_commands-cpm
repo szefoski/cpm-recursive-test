@@ -10,9 +10,10 @@ parse:
         FORCE: 1
         VERSION: 1
         GIT_TAG: 1
+        GIT_TAG: 1
         DOWNLOAD_ONLY: 1
         GITHUB_REPOSITORY: 1
-        GITLAB_REPOSITORY: 1
+        GIT_PROGRESS: 1
         GIT_REPOSITORY: 1
         SVN_REPOSITORY: 1
         SVN_REVISION: 1

@@ -7,6 +7,12 @@ project(
 
 set(CMAKE_COLOR_DIAGNOSTICS ON)
 
+# Enable testing - creates BUILD_TESTING option (OFF by default)
+option(BUILD_TESTING "Build the testing tree" OFF)
+if(BUILD_TESTING)
+  enable_testing()
+endif()
+
 # Shared CPM cache for monorepo
 set(CPM_SOURCE_CACHE
     "${CMAKE_SOURCE_DIR}/.cpm-cache"
@@ -14,7 +20,7 @@ set(CPM_SOURCE_CACHE
 )
 
 # CPM setup for application - only the final consumer uses lock file
-include(cmake/CPM.cmake)
+include(cmake/CPM-dz-patched.cmake)
 CPMUsePackageLock(package-lock.cmake)
 
 # Monorepo aggregator - each subproject manages its own dependencies

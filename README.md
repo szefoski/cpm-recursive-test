@@ -71,7 +71,7 @@ find_package(nlohmann_json REQUIRED)  # Or use submodules, or...
 
 **With CPM:**
 ```cmake
-include(cmake/CPM.cmake)
+include(cmake/CPM-dz-patched.cmake)
 CPMAddPackage("gh:fmtlib/fmt#12.1.0")  # Automatic download & build
 CPMAddPackage("gh:nlohmann/json#v3.11.3")
 ```
@@ -105,6 +105,8 @@ file(DOWNLOAD
 include(${CMAKE_BINARY_DIR}/cmake/CPM.cmake)
 ```
 
+> **Note:** This project uses `CPM-dz-patched.cmake` - a patched version of CPM.cmake v0.42.0 that fixes package lock file portability when using the `PATCHES` parameter. See [`cmake/CPM-dz-patched-README.md`](cmake/CPM-dz-patched-README.md) for details about the fix.
+
 ### 2. Add Dependencies
 
 ```cmake
@@ -112,7 +114,7 @@ include(${CMAKE_BINARY_DIR}/cmake/CPM.cmake)
 cmake_minimum_required(VERSION 3.23)
 project(MyProject)
 
-include(cmake/CPM.cmake)
+include(cmake/CPM-dz-patched.cmake)
 
 # Add packages
 CPMAddPackage("gh:fmtlib/fmt#12.1.0")
@@ -246,7 +248,8 @@ cpm-recursive-test/
 ├── CMakeLists.txt              # Root configuration with package lock
 ├── package-lock.cmake          # Locked dependency versions (auto-generated)
 ├── cmake/
-│   └── CPM.cmake              # Vendored CPM v0.42.0
+│   ├── CPM-dz-patched.cmake          # Patched CPM v0.42.0
+│   └── CPM-dz-patched-README.md      # Patch documentation
 ├── src/
 │   ├── CMakeLists.txt         # Main executable
 │   └── main.cpp
@@ -465,7 +468,7 @@ cmake_minimum_required(VERSION 3.23)
 project(MyApp)
 
 # Package lock file - reproducible builds
-include(cmake/CPM.cmake)
+include(cmake/CPM-dz-patched.cmake)
 CPMUsePackageLock(package-lock.cmake)
 
 # Add component layers
@@ -488,7 +491,7 @@ add_subdirectory(src)
 cmake_minimum_required(VERSION 3.23)
 project(hal VERSION 1.0.0)
 
-include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/CPM-dz-patched.cmake)
 
 # Declare dependency requirements (not locked)
 CPMDeclarePackage(fmt

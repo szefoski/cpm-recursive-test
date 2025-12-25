@@ -1313,7 +1313,7 @@ function(cpm_prettify_package_arguments OUT_VAR IS_IN_COMMENT)
       EXCLUDE_FROM_ALL
       SOURCE_SUBDIR
   )
-  set(multiValueArgs URL OPTIONS DOWNLOAD_COMMAND)
+  set(multiValueArgs URL OPTIONS DOWNLOAD_COMMAND PATCHES)
   cmake_parse_arguments(CPM_ARGS "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   foreach(oneArgName ${oneValueArgs})
@@ -1338,6 +1338,12 @@ function(cpm_prettify_package_arguments OUT_VAR IS_IN_COMMENT)
       foreach(singleOption ${CPM_ARGS_${multiArgName}})
         if(${IS_IN_COMMENT})
           string(APPEND PRETTY_OUT_VAR "#")
+        endif()
+        # Replace CMAKE_SOURCE_DIR in PATCHES paths with variable reference
+        if(${multiArgName} STREQUAL "PATCHES")
+          string(REPLACE ${CMAKE_SOURCE_DIR} "\${CMAKE_SOURCE_DIR}" singleOption
+                         ${singleOption}
+          )
         endif()
         string(APPEND PRETTY_OUT_VAR "    \"${singleOption}\"\n")
       endforeach()
