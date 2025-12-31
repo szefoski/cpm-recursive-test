@@ -190,22 +190,10 @@ Interaction with patches, cache keys and lock files:
 - `PATCHES` and `CUSTOM_CACHE_KEY`: patched sources must be cached separately. Use `CUSTOM_CACHE_KEY` (for example `"3.11.3-patched"`) to make patched caches explicit and shareable.
 - Lock files (`package-lock.cmake`) include cache metadata (such as `CUSTOM_CACHE_KEY`) so an application can reliably reproduce the same cached resolution across machines.
 
-Offline builds & CI tips:
-
-- Populate the cache once (developer machine or a CI warm-up job), then restore the cache for subsequent CI jobs to avoid redownloading.
-- In CI, restore the cached folder before running `cmake` and save it back after the job completes.
-
 Invalidation & updates:
 
 - To force CPM to re-download or apply new patches, remove the specific package cache directory, e.g. `rm -rf .cpm-cache/nlohmann_json/3.11.3-patched`, or clear the whole cache.
 - Alternatively, change `CUSTOM_CACHE_KEY` when applying patches to keep old and new caches side-by-side.
-
-Best practices:
-
-- Use a per-repo local cache for development (`${sourceDir}/.cpm-cache`) and a shared global cache for CI if appropriate.
-- Add `.cpm-cache/` to `.gitignore` and use your CI's caching mechanism to store/restore the directory between jobs.
-- Prefer `CUSTOM_CACHE_KEY` for released versions and append `-patched` for patched variants so caches are explicit and predictable.
-- When changing patches or package options, either bump `CUSTOM_CACHE_KEY` or delete the affected cache entry and regenerate the lock file.
 
 Example commands:
 
@@ -246,7 +234,48 @@ These options are applied in `CPMDeclarePackage()` calls to control caching, dow
 
 - `EXCLUDE_FROM_ALL YES` — prevents building dependency tests/examples unless explicitly requested, significantly speeding up builds.
 
-These flags together give fast, deterministic, and space-efficient dependency management in CI and on developer machines.
+- `SYSTEM YES` — mark the dependency as a system/external package. This is primarily a metadata hint indicating the package is third-party (not a local project component). It does not prevent CPM from downloading or caching the package; rather it documents intent and can influence how the package's targets or include directories are treated by downstream CMake code. Use `SYSTEM YES` for typical third-party libraries to make the origin explicit when declaring packages.
+`SYSTEM YES` marks a package as third‑party (metadata). Many packages convert this hint into `SYSTEM` include directories (so compilers suppress warnings), but suppression depends on the package/imported target. Use `target_include_directories(... SYSTEM ...)` or a small wrapper target when you need to force warning suppression for a dependency.
+
+
+
+### SYSTEM YES — behavior, warnings, and how to suppress them
+
+Short answer: `SYSTEM YES` documents that a package is a third‑party/system dependency (not part of your application's source). It is a metadata hint indicating intent; some toolchains and CMake code will treat such packages differently (for example by marking include directories as `SYSTEM` so compilers suppress warnings from those headers), but `SYSTEM YES` alone does not automatically guarantee warning suppression for every package.
+
+Details and caveats:
+
+- Intent vs effect: `SYSTEM YES` signals origin/intent. Whether warnings are suppressed depends on how the package's imported targets were created. If the package's CMake sets its include dirs with `SYSTEM`, the compiler will typically suppress warnings coming from those headers. If it does not, you'll still see warnings unless you or the package mark includes as system.
+- CPM behavior: CPM records the `SYSTEM` flag as package metadata; it does not rewrite a package's CMakeLists for you. The flag is useful for documentation, automation, or wrapper logic that needs to treat third‑party packages differently.
+
+How to ensure warnings are suppressed (example):
+
+1) Prefer package CMake that sets system include directories:
+
+```cmake
+target_include_directories(my_imported_target SYSTEM INTERFACE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
+```
+
+2) Or wrap an imported target at the consumer side to add `SYSTEM` includes:
+
+```cmake
+add_library(fmt_system INTERFACE)
+target_link_libraries(fmt_system INTERFACE fmt::fmt)
+get_target_property(_incs fmt::fmt INTERFACE_INCLUDE_DIRECTORIES)
+target_include_directories(fmt_system SYSTEM INTERFACE ${_incs})
+```
+
+3) How to check whether `SYSTEM` was applied:
+
+```cmake
+get_target_property(_incs fmt::fmt INTERFACE_INCLUDE_DIRECTORIES)
+message(STATUS "fmt include dirs: ${_incs}")
+```
+
+Or inspect `compile_commands.json` for `-isystem` entries referencing the dependency headers.
+
 
 ## Patching (PATCHES)
 
