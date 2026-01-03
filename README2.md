@@ -400,6 +400,86 @@ This project includes a modern `CMakePresets.json` (schema version 10) that:
 
 Useful commands:
 
+## Private Repositories & CI (GITHUB_REPOSITORY vs GIT_REPOSITORY)
+
+Short summary:
+
+- `GITHUB_REPOSITORY` is a convenient GitHub-only shorthand (owner/repo) that CPM treats with GitHub-specific optimizations when possible.
+- `GIT_REPOSITORY` is the explicit, host-agnostic Git URL (SSH or HTTPS) you should use for private or non-GitHub hosts.
+
+When to use which:
+
+- Use `GITHUB_REPOSITORY` for public GitHub projects when you want concise declarations and possible archive/download optimizations.
+- Use `GIT_REPOSITORY` for private company repositories or self-hosted Git servers. Prefer SSH URLs for CI (deploy keys) or HTTPS with a token handled securely.
+
+Examples
+
+1) SSH (recommended for CI with deploy keys)
+
+```cmake
+CPMDeclarePackage(
+  mylib
+  NAME mylib
+  GIT_REPOSITORY git@git.company.com:org/mylib.git
+  GIT_TAG v1.2.3
+  GIT_SHALLOW YES
+  CUSTOM_CACHE_KEY "1.2.3"
+)
+```
+
+Make the SSH key available in CI (example with `ssh-agent`):
+
+```bash
+eval "$(ssh-agent -s)"
+ssh-add /secrets/deploy_key
+# Ensure known_hosts has git.company.com fingerprint or disable StrictHostKeyChecking carefully
+cmake -S . -B build
+```
+
+2) HTTPS with token (common in CI when SSH is not available)
+
+Avoid embedding tokens in committed files. Two secure options:
+
+- Use an environment variable inserted by CI (example below). This is simple but be careful with logs.
+- Use `~/.netrc` or a credential helper configured in the CI job to avoid putting secrets on the command line.
+
+Example (inject token via `GIT_TOKEN` env var):
+
+```cmake
+CPMDeclarePackage(
+  mylib
+  NAME mylib
+  GIT_REPOSITORY "https://${ENV{GIT_TOKEN}}@git.company.com/org/mylib.git"
+  GIT_TAG v1.2.3
+)
+```
+
+CI job snippet (create safe `~/.netrc` and restrict permissions):
+
+```bash
+cat > ~/.netrc <<EOF
+machine git.company.com
+  login ci-user
+  password ${GIT_TOKEN}
+EOF
+chmod 600 ~/.netrc
+cmake -S . -B build
+```
+
+Recommendations:
+
+- Prefer SSH deploy keys for CI runners: minimal scope and well supported by Git.
+- If using HTTPS tokens, store them in CI secrets and populate `~/.netrc` or use a credential helper to avoid token leaks.
+- Use `CUSTOM_CACHE_KEY` for patched/private artifacts to keep caches explicit (e.g., `1.2.3-patched`).
+- Add `.cpm-cache/` to `.gitignore` and rely on the CI cache restore mechanism to speed builds.
+
+Security notes:
+
+- Never commit tokens or private keys into the repository.
+- Avoid logging the token; mask secrets in CI and avoid commands that echo variables.
+- Use least-privilege PATs (read-only) scoped to the repositories needed.
+
+
 ```bash
 # Run full pipeline (configure, build, test)
 cmake --workflow --preset debug-workflow

@@ -30,7 +30,7 @@ CPMDeclarePackage(
   nlohmann_json
   NAME nlohmann_json
   VERSION 3.11.3
-  GITHUB_REPOSITORY nlohmann/json
+  GIT_REPOSITORY git@github.com:nlohmann/json.git
   GIT_TAG v3.11.3 CUSTOM_CACHE_KEY "3.11.3-patched"
   PATCHES "${CMAKE_CURRENT_LIST_DIR}/patches/nlohmann_json/01-add-custom-comment.patch"
           "${CMAKE_CURRENT_LIST_DIR}/patches/nlohmann_json/02-customize-namespace.patch"
